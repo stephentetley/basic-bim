@@ -1,2 +1,3 @@
-# basic_bim
-BIM as code / IfcOpenShell experiments
+# basic-bim
+
+BIM-as-code / IfcOpenShell experiments
