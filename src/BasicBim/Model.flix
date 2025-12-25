@@ -21,17 +21,42 @@
 mod BasicBim.Model {
 
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{pyAssign, pyInvoke}
+    use BasicBim.IfcGen.{runIfcGen, pyImport, pyAssign, pyInvoke}
 
     pub enum SourceContext
     pub enum ModelContext
 
     // pub type alias Source[a] = IfcGen[SourceContext, a]
 
-    pub type alias Model[a] = IfcGen[ModelContext, a]
+    type alias ModelCx = Unit
+
+    pub type alias Model[a] = IfcGen[ModelCx, a]
+
+    pub def showPy(m: Model[a]): (String, a) = 
+        let (code, _, a) = runIfcGen((), 1, m);
+        let pycode = Foldable.joinWith(x -> x, String.lineSeparator(), code);
+        (pycode, a)
+
+
+
+    def pyimports(): List[String] = 
+        List#{
+            "ifcopenshell.api.root", 
+            "ifcopenshell.api.unit",
+            "ifcopenshell.api.context",
+            "ifcopenshell.api.project",
+            "ifcopenshell.api.spatial",
+            "ifcopenshell.api.geometry",
+            "ifcopenshell.api.aggregate",
+            "ifcopenshell.api.owner",
+            "ifcopenshell.api.pset",
+            "ifcopenshell.api.style",
+            "numpy"
+        }
 
     pub def model(version: String, ifcfile: String, body: Model[a]): Model[a] = 
         forM(
+            _ <- Foldable.forEachM(pyImport, pyimports());
             _ <- pyAssign("model", "ifcopenshell.api.project.create_file(version='${version}')");
             ans <- body;
             _ <- pyInvoke("model.write('${ifcfile}')")

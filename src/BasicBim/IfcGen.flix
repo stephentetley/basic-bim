@@ -52,6 +52,8 @@ mod BasicBim.IfcGen {
         f1(cx, Chain.empty(), st)
 
 
+
+
     pub def point(x: a): IfcGen[cx, a] = 
         IfcGen((_, code, i) -> (code, i, x))
 
@@ -82,6 +84,9 @@ mod BasicBim.IfcGen {
     pub def freshvar(): IfcGen[cx, String] \ {} =
         IfcGen((_, code, i) -> (code, i+1, "v" + ToString.toString(i)))
 
+
+    pub def pyImport(name: String): IfcGen[cx, Unit] \ {} =
+        tell("import ${name}")
 
     pub def pyAssign(v: String, body: String): IfcGen[cx, Unit] \ {} =
         tell("${v} = ${body}")
