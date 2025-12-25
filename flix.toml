@@ -1,0 +1,9 @@
+[package]
+name        = "basic-bim"
+description = "Experiments generating IFC BIM models"
+version     = "0.1.0"
+flix        = "0.67.2"
+license     = "Apache-2.0"
+authors     = ["Stephen Tetley <stephen.tetley@gmail.com>"]
+
+
