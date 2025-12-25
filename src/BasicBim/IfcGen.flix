@@ -19,7 +19,7 @@ mod BasicBim {
     pub type alias Code = Chain[String]
 
 
-    pub enum IfcGen[cx: Type, a: Type]((cx, Code, Int32) -> (Code, Int32, a))
+    pub enum IfcGen[_cx: Type, a: Type]((Code, Int32) -> (Code, Int32, a))
 
     instance Functor[IfcGen[cx]] {
         pub def map(f: a -> b \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef = 
@@ -47,42 +47,42 @@ mod BasicBim.IfcGen {
 
     use BasicBim.Code
 
-    pub def runIfcGen(cx: cx, st: Int32, f: IfcGen[cx, a]): (Code, Int32, a) = 
+    pub def runIfcGen(st: Int32, f: IfcGen[cx, a]): (Code, Int32, a) = 
         let IfcGen(f1) = f;
-        f1(cx, Chain.empty(), st)
+        f1(Chain.empty(), st)
 
 
 
 
     pub def point(x: a): IfcGen[cx, a] = 
-        IfcGen((_, code, i) -> (code, i, x))
+        IfcGen((code, i) -> (code, i, x))
 
     pub def map(f: a -> b \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef =
-        unchecked_cast(IfcGen((cx, code, i) -> 
-            let (w, s1, a) = runIfcGen(cx, i, x);
+        unchecked_cast(IfcGen((code, i) -> 
+            let (w, s1, a) = runIfcGen(i, x);
             (Chain.append(code, w), s1, unchecked_cast(f(a) as _ \ {}))
         ) as _ \ ef)
 
     pub def ap(f: IfcGen[cx, a -> b \ ef], x: IfcGen[cx, a]): IfcGen[cx, b] \ ef =
-        unchecked_cast(IfcGen((cx, code, i) -> 
-            let (w1, s1, f1) = runIfcGen(cx, i, f);
-            let (w2, s2, x1) = runIfcGen(cx, s1, x);
+        unchecked_cast(IfcGen((code, i) -> 
+            let (w1, s1, f1) = runIfcGen(i, f);
+            let (w2, s2, x1) = runIfcGen(s1, x);
             (Chain.append(Chain.append(code, w1), w2), s2, unchecked_cast(f1(x1) as _ \ {}))
         ) as _ \ ef)
 
     pub def flatMap(f: a -> IfcGen[cx, b] \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef =
-        unchecked_cast(IfcGen((cx, code, i) -> 
-            let (w1, s1, a) = runIfcGen(cx, i, x);
+        unchecked_cast(IfcGen((code, i) -> 
+            let (w1, s1, a) = runIfcGen(i, x);
             let f1 = unchecked_cast(f(a) as _ \  {});
-            let (w2, s2, b) = runIfcGen(cx, s1, f1);
+            let (w2, s2, b) = runIfcGen(s1, f1);
             (Chain.append(Chain.append(code, w1), w2), s2, b)
         ) as _ \ ef)
 
     pub def tell(s: String): IfcGen[cx, Unit] \ {} =
-        IfcGen((_, code, i) -> (Chain.snoc(code, s), i, ()))
+        IfcGen((code, i) -> (Chain.snoc(code, s), i, ()))
 
     pub def freshvar(): IfcGen[cx, String] \ {} =
-        IfcGen((_, code, i) -> (code, i+1, "v" + ToString.toString(i)))
+        IfcGen((code, i) -> (code, i+1, "v" + ToString.toString(i)))
 
 
     pub def pyImport(name: String): IfcGen[cx, Unit] \ {} =

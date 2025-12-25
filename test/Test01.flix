@@ -17,12 +17,14 @@
 mod Test01 {
 
     use BasicBim.IfcGen
-    use BasicBim.Model.{showPy, model}
+    use BasicBim.Model.{showPy, model, ifcproject}
 
     @test
     def test01(): Unit \ IO = 
         let p = BasicBim.IfcGen.point(10);
-        let (py, _) = showPy(model("IFC4X3", "./output/test01.ifc", p));
+        let (py, _) = 
+            model("IFC4X3", "./output/test01.ifc", 
+                ifcproject("Gordon Road STW", p)) |> showPy;
         println(py);
         ()
 

@@ -28,12 +28,14 @@ mod BasicBim.Model {
 
     // pub type alias Source[a] = IfcGen[SourceContext, a]
 
-    type alias ModelCx = Unit
+    pub enum ModelCx
+    pub enum ProjectCx
 
     pub type alias Model[a] = IfcGen[ModelCx, a]
+    pub type alias Project[a] = IfcGen[ProjectCx, a]
 
     pub def showPy(m: Model[a]): (String, a) = 
-        let (code, _, a) = runIfcGen((), 1, m);
+        let (code, _, a) = runIfcGen(1, m);
         let pycode = Foldable.joinWith(x -> x, String.lineSeparator(), code);
         (pycode, a)
 
@@ -54,12 +56,25 @@ mod BasicBim.Model {
             "numpy"
         }
 
-    pub def model(version: String, ifcfile: String, body: Model[a]): Model[a] = 
-        forM(
+    def promote(m: IfcGen[cx1, a]): IfcGen[cx2, a] = match m {       
+        case IfcGen.IfcGen(m1) => IfcGen.IfcGen(m1)
+    }
+
+
+
+    pub def model(version: String, ifcfile: String, body: Project[a]): Model[a] = 
+        promote(forM(
             _ <- Foldable.forEachM(pyImport, pyimports());
             _ <- pyAssign("model", "ifcopenshell.api.project.create_file(version='${version}')");
             ans <- body;
             _ <- pyInvoke("model.write('${ifcfile}')")
-        ) yield ans
+        ) yield ans)
+
+    pub def ifcproject(name: String, body: IfcGen[cx, a]): Project[a] = 
+        promote(forM(
+            _ <- pyAssign("project", "ifcopenshell.api.root.create_entity(model, ifc_class='IfcProject', name='${name}')");
+            ans <- body
+        ) yield ans)
+
 
 }
