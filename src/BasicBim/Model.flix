@@ -21,7 +21,8 @@
 mod BasicBim.Model {
 
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{runIfcGen, pyImport, pyAssign, pyInvoke}
+    use BasicBim.IfcGen.{runIfcGen, pyImport, pyAssign, pyInvoke, pyComment, blankLine, pyAssign2}
+    use BasicBim.IfcGen.IfcSIUnit
 
     pub enum SourceContext
     pub enum ModelContext
@@ -65,16 +66,33 @@ mod BasicBim.Model {
     pub def model(version: String, ifcfile: String, body: Project[a]): Model[a] = 
         promote(forM(
             _ <- Foldable.forEachM(pyImport, pyimports());
+            _ <- blankLine();
             _ <- pyAssign("model", "ifcopenshell.api.project.create_file(version='${version}')");
+            _ <- blankLine();
+            // These should be in users code...
+            // _ <- pyComment("set project units");
+            // _ <- pyAssign("length_units", "ifcopenshell.api.unit.add_si_unit(model, unit_type='LENGTHUNIT', prefix='MILLI')");
+            // _ <- pyAssign("area_units", "ifcopenshell.api.unit.add_si_unit(model, unit_type='AREAUNIT')");
+            // _ <- pyInvoke("ifcopenshell.api.unit.assign_unit(model, units=[length_units, area_units])");
+            // _ <- blankLine();
+            // Next line just an experiment, should be in users code...
+            _length <- unit_add_si_unit(unit_type = "LENGTHUNIT", prefix = "MILLI");
             ans <- body;
+            _ <- blankLine();
             _ <- pyInvoke("model.write('${ifcfile}')")
         ) yield ans)
 
+
+
     pub def ifcproject(name: String, body: IfcGen[cx, a]): Project[a] = 
-        promote(forM(
+        promote(forM (
             _ <- pyAssign("project", "ifcopenshell.api.root.create_entity(model, ifc_class='IfcProject', name='${name}')");
             ans <- body
         ) yield ans)
+
+    pub def unit_add_si_unit(unit_type: {unit_type = String}, prefix: {prefix = String}): Project[IfcSIUnit] = 
+        let var = IfcSIUnit.IfcSIUnit("length_units");
+        pyAssign2(var, "ifcopenshell.api.unit.add_si_unit(model, unit_type='${unit_type#unit_type}', prefix='${prefix#prefix}')")
 
 
 }

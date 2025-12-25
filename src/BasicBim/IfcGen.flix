@@ -91,6 +91,22 @@ mod BasicBim.IfcGen {
     pub def pyAssign(v: String, body: String): IfcGen[cx, Unit] \ {} =
         tell("${v} = ${body}")
 
+
     pub def pyInvoke(body: String): IfcGen[cx, Unit] \ {} =
         tell(body)
+
+    pub def pyComment(body: String): IfcGen[cx, Unit] \ {} =
+        let lines = String.lines(body);
+        Foldable.forEachM(s -> tell("# ${s}"), lines)
+    
+    pub def blankLine(): IfcGen[cx, Unit] \ {} = tell("")
+
+    pub enum IfcSIUnit(String)
+
+    pub def pyAssign2(v: IfcSIUnit, body: String): IfcGen[cx, IfcSIUnit] \ {} =
+        let IfcSIUnit.IfcSIUnit(v1) = v;
+        forM (_ <- tell("${v1} = ${body}")) yield v
+
+
+
 }
