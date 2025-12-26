@@ -57,9 +57,6 @@ mod BasicBim.IfcGen {
         let IfcGen(f1) = f;
         f1(Chain.empty(), st)
 
-
-
-
     pub def point(x: a): IfcGen[cx, a] = 
         IfcGen((code, i) -> (code, i, x))
 
