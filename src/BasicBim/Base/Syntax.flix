@@ -32,8 +32,13 @@ mod BasicBim.Base.Syntax {
     pub type alias Code = Chain[Stmt]
 
     pub def ppCode(x: Code): String = 
-        let doc = Foldable.foldLeft((ac, stmt) -> ac <!> Pretty.pPrint(stmt), empty(), x);
-        Text.PrettyPrint.render(80, doc)
+        region rc { 
+            let sb = StringBuilder.empty(rc);
+            let _ = Foldable.forEach(s -> 
+                { let txt = Pretty.pPrint(s) |> Text.PrettyPrint.render(80); 
+                  StringBuilder.appendLine(txt, sb) }, x);
+            StringBuilder.toString(sb)
+        }
 
     pub enum Stmt with ToString {
         case Import(String)

@@ -16,7 +16,7 @@
 
 mod BasicBim {
 
-    pub type alias Code = Chain[String]
+    use BasicBim.Base.Syntax.Code
 
 
     pub enum IfcGen[_cx: Type, a: Type]((Code, Int32) -> (Code, Int32, a))
@@ -50,7 +50,7 @@ mod BasicBim {
 
 mod BasicBim.IfcGen {
 
-    use BasicBim.Code
+    use BasicBim.Base.Syntax.{Code, Stmt}
     use BasicBim.PyVariable
 
     pub def runIfcGen(st: Int32, f: IfcGen[cx, a]): (Code, Int32, a) = 
@@ -81,7 +81,7 @@ mod BasicBim.IfcGen {
             (Chain.append(Chain.append(code, w1), w2), s2, b)
         ) as _ \ ef)
 
-    pub def tell(s: String): IfcGen[cx, Unit] \ {} =
+    pub def tell(s: Stmt): IfcGen[cx, Unit] \ {} =
         IfcGen((code, i) -> (Chain.snoc(code, s), i, ()))
 
     pub def freshvar(): IfcGen[cx, String] \ {} =
@@ -89,20 +89,20 @@ mod BasicBim.IfcGen {
 
 
     pub def pyImport(name: String): IfcGen[cx, Unit] \ {} =
-        tell("import ${name}")
+        tell(BasicBim.Base.Syntax.Stmt.Import(name))
 
-    pub def pyAssign(v: String, body: String): IfcGen[cx, Unit] \ {} =
-        tell("${v} = ${body}")
+    // pub def pyAssign(v: String, body: String): IfcGen[cx, Unit] \ {} =
+    //     tell("${v} = ${body}")
 
 
-    pub def pyInvoke(body: String): IfcGen[cx, Unit] \ {} =
-        tell(body)
+    // pub def pyInvoke(body: String): IfcGen[cx, Unit] \ {} =
+    //     tell(body)
 
-    pub def pyComment(body: String): IfcGen[cx, Unit] \ {} =
-        let lines = String.lines(body);
-        Foldable.forEachM(s -> tell("# ${s}"), lines)
+    // pub def pyComment(body: String): IfcGen[cx, Unit] \ {} =
+    //     let lines = String.lines(body);
+    //     Foldable.forEachM(s -> tell("# ${s}"), lines)
     
-    pub def blankLine(): IfcGen[cx, Unit] \ {} = tell("")
+    // pub def blankLine(): IfcGen[cx, Unit] \ {} = tell("")
 
     pub enum IfcSIUnit(String)
 
@@ -112,9 +112,9 @@ mod BasicBim.IfcGen {
             v1
     }
 
-    pub def pyAssign2(v: a, body: String): IfcGen[cx, a] \ {} with PyVariable[a] =
-        let v1 = PyVariable.getName(v);
-        forM (_ <- tell("${v1} = ${body}")) yield v
+    // pub def pyAssign2(v: a, body: String): IfcGen[cx, a] \ {} with PyVariable[a] =
+    //     let v1 = PyVariable.getName(v);
+    //     forM (_ <- tell("${v1} = ${body}")) yield v
 
 
 
