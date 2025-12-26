@@ -20,22 +20,26 @@
 
 mod BasicBim.Model {
 
-    use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{runIfcGen, pyImport} // , pyAssign, pyInvoke, pyComment, blankLine, pyAssign2}
-    use BasicBim.IfcGen.IfcSIUnit
 
-    pub enum SourceContext
-    pub enum ModelContext
+    use BasicBim.Base.Syntax.{Stmt}
 
-    // pub type alias Source[a] = IfcGen[SourceContext, a]
 
-    pub enum ModelCx
-    pub enum ProjectCx
+    use BasicBim.IfcGen
+    use BasicBim.IfcGen.{runIfcGen, pyImport}
 
-    pub type alias Model[a] = IfcGen[ModelCx, a]
-    pub type alias Project[a] = IfcGen[ProjectCx, a]
 
-    pub def showPy(m: Model[a]): (String, a) = 
+    // pub enum SourceContext
+    // pub enum ModelContext
+
+    // // pub type alias Source[a] = IfcGen[SourceContext, a]
+
+    // pub enum ModelCx
+    // pub enum ProjectCx
+
+    // pub type alias Model[a] = IfcGen[ModelCx, a]
+    // pub type alias Project[a] = IfcGen[ProjectCx, a]
+
+    pub def showPy(m: IfcGen[cx, a]): (String, a) = 
         let (code, _, a) = runIfcGen(1, m);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
@@ -57,42 +61,30 @@ mod BasicBim.Model {
             "numpy"
         }
 
-    pub def promote(m: IfcGen[cx1, a]): IfcGen[cx2, a] = match m {       
-        case IfcGen.IfcGen(m1) => IfcGen.IfcGen(m1)
-    }
+    // pub def promote(m: IfcGen[cx1, a]): IfcGen[cx2, a] = match m {       
+    //     case IfcGen.IfcGen(m1) => IfcGen.IfcGen(m1)
+    // }
 
 
 
-    pub def model(_version: String, _ifcfile: String, body: Project[a]): Model[a] = 
-        promote(forM(
+    pub def model(version: String, _ifcfile: String, body: IfcGen[cx, a]): IfcGen[cx, Unit] = 
+        forM (
             _ <- Foldable.forEachM(pyImport, pyimports());
-            // _ <- blankLine();
-            // _ <- pyAssign("model", "ifcopenshell.api.project.create_file(version='${version}')");
-            // _ <- blankLine();
-            // // These should be in users code...
-            // // _ <- pyComment("set project units");
-            // // _ <- pyAssign("length_units", "ifcopenshell.api.unit.add_si_unit(model, unit_type='LENGTHUNIT', prefix='MILLI')");
-            // // _ <- pyAssign("area_units", "ifcopenshell.api.unit.add_si_unit(model, unit_type='AREAUNIT')");
-            // // _ <- pyInvoke("ifcopenshell.api.unit.assign_unit(model, units=[length_units, area_units])");
-            // // _ <- blankLine();
-            // // Next line just an experiment, should be in users code...
-            // _length <- unit_add_si_unit(unit_type = "LENGTHUNIT", prefix = "MILLI");
-            ans <- body
-            // _ <- blankLine();
-            // _ <- pyInvoke("model.write('${ifcfile}')")
-        ) yield ans)
+            _model <- BasicBim.API.Project.create_file(version=version);
+            _ <- body
+        ) yield ()
 
 
 
-    // pub def ifcproject(name: String, body: IfcGen[cx, a]): Project[a] = 
-    //     promote(forM (
-    //         _ <- pyAssign("project", "ifcopenshell.api.root.create_entity(model, ifc_class='IfcProject', name='${name}')");
-    //         ans <- body
-    //     ) yield ans)
+    // // pub def ifcproject(name: String, body: IfcGen[cx, a]): Project[a] = 
+    // //     promote(forM (
+    // //         _ <- pyAssign("project", "ifcopenshell.api.root.create_entity(model, ifc_class='IfcProject', name='${name}')");
+    // //         ans <- body
+    // //     ) yield ans)
 
-    // pub def unit_add_si_unit(unit_type: {unit_type = String}, prefix: {prefix = String}): Project[IfcSIUnit] = 
-    //     let var = IfcSIUnit.IfcSIUnit("length_units");
-    //     pyAssign2(var, "ifcopenshell.api.unit.add_si_unit(model, unit_type='${unit_type#unit_type}', prefix='${prefix#prefix}')")
+    // // pub def unit_add_si_unit(unit_type: {unit_type = String}, prefix: {prefix = String}): Project[IfcSIUnit] = 
+    // //     let var = IfcSIUnit.IfcSIUnit("length_units");
+    // //     pyAssign2(var, "ifcopenshell.api.unit.add_si_unit(model, unit_type='${unit_type#unit_type}', prefix='${prefix#prefix}')")
 
 
 }

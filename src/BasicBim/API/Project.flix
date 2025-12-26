@@ -20,21 +20,15 @@
 
 mod BasicBim.API.Project {
 
-    // use BasicBim.{IfcGen}
-    // use BasicBim.IfcGen.{runIfcGen, pyImport, pyAssign, pyInvoke, pyComment, blankLine, pyAssign2}
-    // use BasicBim.PyVariable
-
-    // pub enum IfcProjectFile(String)
-
-    // instance PyVariable[IfcProjectFile] {
-    //     pub def getName(v: IfcProjectFile): String = 
-    //         let IfcProjectFile.IfcProjectFile(v1) = v;
-    //         v1
-    // }
-
-    // pub def create_file(version: {version = String}): IfcGen[cx, IfcProjectFile] = 
-    //     let var = IfcProjectFile.IfcProjectFile("model");
-    //     pyAssign2(var, "ifcopenshell.api.project.create_file(version='${version#version}')")
-
+    use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
+    use BasicBim.{IfcGen}
+    use BasicBim.IfcGen.{freshvar, pyAssign}
+    
+    pub def create_file(version: {version = String}): IfcGen[cx, Expr] = 
+        let args = List#{FunArg.Named("version", stringLiteral(version#version))};
+        forM (
+            var <- freshvar();
+            ans <- pyAssign(var, "ifcopenshell.api.project.create_file", args)
+        ) yield ans
 
 }

@@ -15,28 +15,26 @@
  */
 
 
-
-
-
 mod BasicBim.Base.Syntax {
 
     use Text.Pretty
     use Text.PrettyPrint
     use Text.PrettyLevel
     use Text.PrettyPrint.Doc
-    use Text.PrettyPrint.{<<>>, <^>, <!>}
+    use Text.PrettyPrint.{<<>>}
     use Text.PrettyPrint.{empty, int32, squotes, encloseSep, text, char, comma, dot,
         intersperse, lparen, rparen, parens, tupled, vcat, nest}
-
 
     pub type alias Code = Chain[Stmt]
 
     pub def ppCode(x: Code): String = 
-        region rc { 
+        def step(d: Stmt): String = {
+            let txt = Pretty.pPrint(d);
+            Text.PrettyPrint.render(80, txt)
+        };
+        region rc {
             let sb = StringBuilder.empty(rc);
-            let _ = Foldable.forEach(s -> 
-                { let txt = Pretty.pPrint(s) |> Text.PrettyPrint.render(80); 
-                  StringBuilder.appendLine(txt, sb) }, x);
+            let _ = Foldable.forEach(s -> { let txt = step(s); StringBuilder.appendLine(txt, sb) }, x);
             StringBuilder.toString(sb)
         }
 
@@ -63,6 +61,8 @@ mod BasicBim.Base.Syntax {
         case Apply(Expr, List[FunArg])
     }
     
+    pub def stringLiteral(s: String): Expr = Expr.Lit("'${s}'")
+
     instance Pretty[Expr] {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
             case Expr.Lit(v)            => text(v)
