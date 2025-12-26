@@ -39,6 +39,11 @@ mod BasicBim {
             BasicBim.IfcGen.flatMap(f, x)
     }
 
+
+    trait PyVariable[t] {
+        pub def getName(x: t): String
+    }
+
 }
 
 
@@ -46,6 +51,7 @@ mod BasicBim {
 mod BasicBim.IfcGen {
 
     use BasicBim.Code
+    use BasicBim.PyVariable
 
     pub def runIfcGen(st: Int32, f: IfcGen[cx, a]): (Code, Int32, a) = 
         let IfcGen(f1) = f;
@@ -103,8 +109,14 @@ mod BasicBim.IfcGen {
 
     pub enum IfcSIUnit(String)
 
-    pub def pyAssign2(v: IfcSIUnit, body: String): IfcGen[cx, IfcSIUnit] \ {} =
-        let IfcSIUnit.IfcSIUnit(v1) = v;
+    instance PyVariable[IfcSIUnit] {
+        pub def getName(v: IfcSIUnit): String = 
+            let IfcSIUnit.IfcSIUnit(v1) = v;
+            v1
+    }
+
+    pub def pyAssign2(v: a, body: String): IfcGen[cx, a] \ {} with PyVariable[a] =
+        let v1 = PyVariable.getName(v);
         forM (_ <- tell("${v1} = ${body}")) yield v
 
 
