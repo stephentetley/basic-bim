@@ -45,7 +45,7 @@ mod BasicBim.Model {
         (pycode, a)
 
 
-
+    // TODO put these in a record as part of inital context...
     def pyimports(): List[String] = 
         List#{
             "ifcopenshell.api.root", 

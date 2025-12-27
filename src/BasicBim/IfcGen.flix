@@ -18,6 +18,9 @@ mod BasicBim {
 
     use BasicBim.Base.Syntax.Code
 
+    // Could change state to a Map[String, Int32] to allow more 
+    // meaningful variable names
+
     pub enum IfcGen[r: RecordRow, a: Type](({| r}, Code, Int32) -> (Code, Int32, a))
 
     instance Functor[IfcGen[cx]] {

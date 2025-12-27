@@ -36,5 +36,14 @@ mod BasicBim.API.Aggregate {
             ans <- pyAssign(var, "ifcopenshell.api.aggregate.assign_object", args)
         ) yield ans
 
+    pub def unassign_object[r: RecordRow](products: {products = List[String]}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model: Expr) = 
+            List#{FunArg.Named("model", model), 
+                    FunArg.Named("products", Expr.PyList(List.map(stringLiteral, products#products)))};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.aggregate.unassign_object", args)
+        ) yield ans
 
 }
