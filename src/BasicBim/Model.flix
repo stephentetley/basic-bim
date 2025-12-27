@@ -39,7 +39,7 @@ mod BasicBim.Model {
     // pub type alias Model[a] = IfcGen[ModelCx, a]
     // pub type alias Project[a] = IfcGen[ProjectCx, a]
 
-    pub def showPy(ctx: cx, m: IfcGen[cx, a]): (String, a) = 
+    pub def showPy(ctx: {| cx}, m: IfcGen[cx, a]): (String, a) = 
         let (code, _, a) = runIfcGen(ctx, 1, m);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
@@ -63,24 +63,46 @@ mod BasicBim.Model {
 
 
 
-    pub def model(version: String, _ifcfile: String, body: IfcGen[{model = Expr | r}, a]): IfcGen[{ | r}, Unit] = 
+    pub def model[r: RecordRow, a: Type](version: String, _ifcfile: String, body: IfcGen[(model = Expr | r), a]): IfcGen[( | r), a] = 
         forM (
             _ <- Foldable.forEachM(pyImport, pyimports());
             model <- BasicBim.API.Project.create_file(version=version);
-            _ <- local(cx -> {+model=model| cx}, body)
-        ) yield ()
+            ans <- local(cx -> {+model=model| cx}, body)
+        ) yield ans
 
 
 
-    // // pub def ifcproject(name: String, body: IfcGen[cx, a]): Project[a] = 
-    // //     promote(forM (
-    // //         _ <- pyAssign("project", "ifcopenshell.api.root.create_entity(model, ifc_class='IfcProject', name='${name}')");
-    // //         ans <- body
-    // //     ) yield ans)
+    pub def ifcProject[r: RecordRow, a: Type](name: String, 
+                                                body: IfcGen[(model = Expr, ifcproject = Expr | r), a]): IfcGen[(model = Expr | r), a] =
+        forM (
+            vproject <- BasicBim.API.Root.create_entity(ifc_class = "IfcProject", name = name);
+            ans <- local(cx -> {+ifcproject=vproject| cx}, body)
+        ) yield ans
 
-    // // pub def unit_add_si_unit(unit_type: {unit_type = String}, prefix: {prefix = String}): Project[IfcSIUnit] = 
-    // //     let var = IfcSIUnit.IfcSIUnit("length_units");
-    // //     pyAssign2(var, "ifcopenshell.api.unit.add_si_unit(model, unit_type='${unit_type#unit_type}', prefix='${prefix#prefix}')")
+
+
+    pub def ifcSite[r: RecordRow, a: Type](name: String, 
+                                            body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr | r), a] =
+        forM (
+            vsite <- BasicBim.API.Root.create_entity(ifc_class = "IfcSite", name = name);
+            ans <- local(cx -> {+ifcsite=vsite| cx}, body)
+        ) yield ans
+
+
+    pub def ifcBuilding[r: RecordRow, a: Type](name: String, 
+                                                body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), a] =
+        forM (
+            vbuilding <- BasicBim.API.Root.create_entity(ifc_class = "IfcBuilding", name = name);
+            ans <- local(cx -> {+ifcbuilding=vbuilding| cx}, body)
+        ) yield ans
+
+
+    pub def ifcBuildingStorey[r: RecordRow, a: Type](name: String, 
+                                                    body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr, ifcbuildingstorey = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr | r), a] =
+        forM (
+            vbuildingstorey <- BasicBim.API.Root.create_entity(ifc_class = "IfcBuildingStorey", name = name);
+            ans <- local(cx -> {+ifcbuildingstorey=vbuildingstorey| cx}, body)
+        ) yield ans        
 
 
 }

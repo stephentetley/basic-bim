@@ -15,21 +15,22 @@
  */
 
 
-
-
-
 mod BasicBim.API.Root {
 
+    use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{freshvar, pyAssign}
+    use BasicBim.IfcGen.{freshvar, asks, pyAssign}
     
-    pub def create_entity(ifc_class: {ifc_class = String}, name: {name = String}): IfcGen[cx, Expr] = 
-        let args = List#{FunArg.Unnamed(Expr.Var("model")), 
-                        FunArg.Named("ifc_class", stringLiteral(ifc_class#ifc_class)), 
-                        FunArg.Named("name", stringLiteral(name#name))};
+    pub def create_entity[r: RecordRow](ifc_class: {ifc_class = String}, 
+                                        name: {name = String}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model) = 
+            List#{FunArg.Named("file", model),
+                    FunArg.Named("ifc_class", stringLiteral(ifc_class#ifc_class)), 
+                    FunArg.Named("name", stringLiteral(name#name))};
         forM (
             var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.root.create_entity", args)
         ) yield ans
 

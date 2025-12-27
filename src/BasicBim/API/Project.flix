@@ -15,9 +15,6 @@
  */
 
 
-
-
-
 mod BasicBim.API.Project {
 
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}

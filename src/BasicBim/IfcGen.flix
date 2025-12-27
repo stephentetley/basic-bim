@@ -18,7 +18,7 @@ mod BasicBim {
 
     use BasicBim.Base.Syntax.Code
 
-    pub enum IfcGen[cx: Type, a: Type]((cx, Code, Int32) -> (Code, Int32, a))
+    pub enum IfcGen[r: RecordRow, a: Type](({| r}, Code, Int32) -> (Code, Int32, a))
 
     instance Functor[IfcGen[cx]] {
         pub def map(f: a -> b \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef = 
@@ -43,7 +43,7 @@ mod BasicBim.IfcGen {
 
     use BasicBim.Base.Syntax.{Code, Stmt, Expr, FunArg}
 
-    pub def runIfcGen(ctx: cx, st: Int32, f: IfcGen[cx, a]): (Code, Int32, a) = 
+    pub def runIfcGen(ctx: {| r}, st: Int32, f: IfcGen[r, a]): (Code, Int32, a) = 
         let IfcGen(f1) = f;
         f1(ctx, Chain.empty(), st)
 
@@ -75,23 +75,22 @@ mod BasicBim.IfcGen {
     pub def tell(s: Stmt): IfcGen[cx, Unit] \ {} =
         IfcGen((_, code, i) -> (Chain.snoc(code, s), i, ()))
 
-    pub def ask(): IfcGen[cx, cx] \ {} =
+    pub def ask(): IfcGen[cx, {| cx}] \ {} =
         IfcGen((cx, code, i) -> (code, i, cx))
 
-    pub def asks(f: cx -> a \ ef): IfcGen[cx, a] \ ef =
+    pub def asks(f: {| r} -> a \ ef): IfcGen[r, a] \ ef =
         unchecked_cast(IfcGen((cx, code, i) -> 
             let ans = unchecked_cast(f(cx) as _ \ {});
             (code, i, ans)
         ) as _ \ ef)
 
 
-    pub def local(f: cx -> cx1 \ ef, m: IfcGen[cx1, a]): IfcGen[cx, a] \ ef =
+    pub def local(f: {| r} -> {| r1} \ ef, m: IfcGen[r1, a]): IfcGen[r, a] \ ef =
         unchecked_cast(IfcGen((cx, code, i) -> 
             let cx1 = unchecked_cast(f(cx) as _ \ {});
             let (w1, s1, a) = runIfcGen(cx1, i, m);
             (Chain.append(code, w1), s1, a)
         ) as _ \ ef)
-
 
     pub def freshvar(): IfcGen[cx, Expr] \ {} =
         IfcGen((_, code, i) -> (code, i+1, Expr.Var("v" + ToString.toString(i))))
