@@ -21,11 +21,11 @@
 mod BasicBim.Model {
 
 
-    use BasicBim.Base.Syntax.{Stmt}
+    use BasicBim.Base.Syntax.{Stmt, Expr}
 
 
     use BasicBim.IfcGen
-    use BasicBim.IfcGen.{runIfcGen, pyImport}
+    use BasicBim.IfcGen.{runIfcGen, local, pyImport}
 
 
     // pub enum SourceContext
@@ -39,8 +39,8 @@ mod BasicBim.Model {
     // pub type alias Model[a] = IfcGen[ModelCx, a]
     // pub type alias Project[a] = IfcGen[ProjectCx, a]
 
-    pub def showPy(m: IfcGen[cx, a]): (String, a) = 
-        let (code, _, a) = runIfcGen(1, m);
+    pub def showPy(ctx: cx, m: IfcGen[cx, a]): (String, a) = 
+        let (code, _, a) = runIfcGen(ctx, 1, m);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
 
@@ -61,17 +61,13 @@ mod BasicBim.Model {
             "numpy"
         }
 
-    // pub def promote(m: IfcGen[cx1, a]): IfcGen[cx2, a] = match m {       
-    //     case IfcGen.IfcGen(m1) => IfcGen.IfcGen(m1)
-    // }
 
 
-
-    pub def model(version: String, _ifcfile: String, body: IfcGen[cx, a]): IfcGen[cx, Unit] = 
+    pub def model(version: String, _ifcfile: String, body: IfcGen[{model = Expr | r}, a]): IfcGen[{ | r}, Unit] = 
         forM (
             _ <- Foldable.forEachM(pyImport, pyimports());
-            _model <- BasicBim.API.Project.create_file(version=version);
-            _ <- body
+            model <- BasicBim.API.Project.create_file(version=version);
+            _ <- local(cx -> {+model=model| cx}, body)
         ) yield ()
 
 

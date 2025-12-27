@@ -24,12 +24,14 @@ mod BasicBim.API.Aggregate {
     use BasicBim.{IfcGen}
     use BasicBim.IfcGen.{freshvar, pyAssign}
 
-    // needs to get model from context...
+    // Gets model from context...
 
     pub def assign_object(products: {products = List[String]}): IfcGen[cx, Expr] = 
-        let args = List#{FunArg.Named("products", Expr.PyList(List.map(stringLiteral, products#products)))};
+        def makeArgs(model: Expr) = 
+            List#{FunArg.Named("model", model), FunArg.Named("products", Expr.PyList(List.map(stringLiteral, products#products)))};
         forM (
             var <- freshvar();
+            args <- Applicative.point(makeArgs(var));
             ans <- pyAssign(var, "ifcopenshell.api.aggregate.assign_object", args)
         ) yield ans
 

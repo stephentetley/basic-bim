@@ -23,7 +23,7 @@ mod Test01 {
     def test01(): Unit \ IO = 
         let p = BasicBim.IfcGen.point(10);
         let (py, _) = 
-            model("IFC4X3", "./output/test01.ifc", p) |> showPy;
+            model("IFC4X3", "./output/test01.ifc", p) |> showPy({});
         println(py);
         ()
 
