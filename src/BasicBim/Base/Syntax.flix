@@ -23,7 +23,7 @@ mod BasicBim.Base.Syntax {
     use Text.PrettyPrint.Doc
     use Text.PrettyPrint.{<<>>}
     use Text.PrettyPrint.{empty, int32, squotes, encloseSep, text, char, comma, dot,
-        intersperse, lparen, rparen, parens, tupled, vcat, nest}
+        intersperse, lparen, rparen, parens, tupled, commaBrackets, vcat, nest}
 
     pub type alias Code = Chain[Stmt]
 
@@ -59,9 +59,14 @@ mod BasicBim.Base.Syntax {
         case Lit(String)
         case Var(String)
         case Apply(Expr, List[FunArg])
+        case PyList(List[Expr])
     }
     
+    // Trait for Python literals?
+
     pub def stringLiteral(s: String): Expr = Expr.Lit("'${s}'")
+
+    pub def otherLiteral(x: t): Expr with ToString[t] = Expr.Lit(ToString.toString(x))
 
     instance Pretty[Expr] {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
@@ -69,6 +74,8 @@ mod BasicBim.Base.Syntax {
             case Expr.Var(s)            => text(s)
             case Expr.Apply(funE, args) => 
                 Pretty.pPrintPrec(d, p, funE) ++ tupled(List.map(Pretty.pPrintPrec(d, p), args))
+
+            case Expr.PyList(xs)        => commaBrackets(List.map(Pretty.pPrintPrec(d, p), xs))
         }
     }
 
