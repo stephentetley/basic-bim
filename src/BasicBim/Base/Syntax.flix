@@ -96,6 +96,12 @@ mod BasicBim.Base.Syntax {
         case None     => Expr.Lit("None")
     }
 
+    
+    pub def listOrNone(xs: List[Expr]): Expr = match xs {
+        case Nil  => Expr.Lit("None")
+        case _    => Expr.PyList(xs)
+    }
+
     instance Pretty[Expr] {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
             case Expr.Lit(v)            => text(v)
