@@ -156,21 +156,22 @@ ifcopenshell.api.style.assign_representation_styles(
 )
 
 # connect walls
-
-connection_args = {'relating_connection': 'ATEND', 'related_connection': 'ATSTART'}
-
 rel_connect_paths = [
     ifcopenshell.api.geometry.connect_path(
-        model, relating_element=mcc_kiosk_front_wall, related_element=mcc_kiosk_right_wall, **connection_args
+        model, relating_element=mcc_kiosk_front_wall, related_element=mcc_kiosk_right_wall,
+        relating_connection='ATEND', related_connection='ATSTART'
     ),
     ifcopenshell.api.geometry.connect_path(
-        model, relating_element=mcc_kiosk_right_wall, related_element=mcc_kiosk_back_wall, **connection_args
+        model, relating_element=mcc_kiosk_right_wall, related_element=mcc_kiosk_back_wall,
+        relating_connection='ATEND', related_connection='ATSTART'
     ),
     ifcopenshell.api.geometry.connect_path(
-        model, relating_element=mcc_kiosk_back_wall, related_element=mcc_kiosk_left_wall, **connection_args
+        model, relating_element=mcc_kiosk_back_wall, related_element=mcc_kiosk_left_wall, 
+        relating_connection='ATEND', related_connection='ATSTART'
     ),
     ifcopenshell.api.geometry.connect_path(
-        model, relating_element=mcc_kiosk_left_wall, related_element=mcc_kiosk_front_wall, **connection_args
+        model, relating_element=mcc_kiosk_left_wall, related_element=mcc_kiosk_front_wall, 
+        relating_connection='ATEND', related_connection='ATSTART'
     )
 ]
 

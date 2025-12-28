@@ -61,6 +61,25 @@ mod BasicBim.API.Geometry {
             ans <- pyAssign(var, "ifcopenshell.api.geometry.assign_representation", args)
         ) yield ans
 
+    pub def connect_path[r: RecordRow](relating_element: {relating_element = Expr}, 
+                                        related_element: {related_element = Expr},
+                                        relating_connection: {relating_connection = String},
+                                        related_connection: {related_connection = String}, 
+                                        description: {description = String}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model) = 
+            List#{FunArg.Named("file", model),
+                    FunArg.Named("relating_element", relating_element#relating_element), 
+                    FunArg.Named("related_element", related_element#related_element), 
+                    FunArg.Named("relating_connection", stringLiteral(relating_connection#relating_connection)), 
+                    FunArg.Named("related_connection", stringLiteral(related_connection#related_connection)), 
+                    FunArg.Named("description", stringLiteral(description#description))};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.geometry.connect_path", args)
+        ) yield ans
+
+
     pub def edit_object_placement[r: RecordRow](product: {product = Expr}, 
                                                 matrix: {matrix = Expr}, 
                                                 is_si: {is_si = Bool}, 
