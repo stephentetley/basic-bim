@@ -23,7 +23,7 @@ mod BasicBim.Base.Syntax {
     use Text.PrettyPrint.Doc
     use Text.PrettyPrint.{<<>>}
     use Text.PrettyPrint.{empty, int32, squotes, encloseSep, text, char, comma, dot,
-        intersperse, lparen, rparen, parens, tupled, commaBrackets, vcat, nest}
+        intersperse, lparen, rparen, parens, tupled, commaBrackets, commaBraces, vcat, nest}
 
     pub type alias Code = Chain[Stmt]
 
@@ -60,13 +60,30 @@ mod BasicBim.Base.Syntax {
         case Var(String)
         case Apply(Expr, List[FunArg])
         case PyList(List[Expr])
+        case Dict(List[(String, Expr)])
+        case PyNone
     }
     
     // Trait for Python literals?
 
+    // pub trait ToLiteral[t] {
+    //     pub def toLiteral(x: t): Expr
+    // }
+
     pub def stringLiteral(s: String): Expr = Expr.Lit("'${s}'")
+    
+    pub def stringLiteralOrNone(x: Option[String]): Expr = match x {
+        case Some(s) => stringLiteral(s)
+        case None    => Expr.PyNone
+    }
 
     pub def otherLiteral(x: t): Expr with ToString[t] = Expr.Lit(ToString.toString(x))
+
+    
+    pub def otherLiteralOrNone(x: Option[t]): Expr with ToString[t] = match x {
+        case Some(x1) => otherLiteral(x1)
+        case None     => Expr.PyNone
+    }
 
     instance Pretty[Expr] {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
@@ -76,6 +93,10 @@ mod BasicBim.Base.Syntax {
                 Pretty.pPrintPrec(d, p, funE) ++ tupled(List.map(Pretty.pPrintPrec(d, p), args))
 
             case Expr.PyList(xs)        => commaBrackets(List.map(Pretty.pPrintPrec(d, p), xs))
+            case Expr.Dict(xs)          => 
+                commaBraces(List.map(match ((n,v)) -> squotes(text(n)) ++ char(':') <<>> Pretty.pPrintPrec(d, p, v), xs))
+
+            case Expr.PyNone            => text("None")
         }
     }
 

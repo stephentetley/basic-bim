@@ -22,6 +22,24 @@ mod BasicBim.API.Owner {
     use BasicBim.{IfcGen}
     use BasicBim.IfcGen.{freshvar, asks, pyAssign}
     
+
+    pub def add_application[r: RecordRow](application_developer: {application_developer = Expr},
+                                            version: {version = String},                                             
+                                            application_full_name: {application_full_name = String},
+                                            application_identifier: {application_identifier = String}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model) = 
+            List#{FunArg.Named("file", model),
+                    FunArg.Named("application_developer", application_developer#application_developer), 
+                    FunArg.Named("version", stringLiteral(version#version)),
+                    FunArg.Named("application_full_name", stringLiteral(application_full_name#application_full_name)),
+                    FunArg.Named("application_identifier", stringLiteral(application_identifier#application_identifier))};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.owner.add_application", args)
+        ) yield ans
+
+
     pub def add_organisation[r: RecordRow](identification: {identification = String}, 
                                             name: {name = String}): IfcGen[(model = Expr | r), Expr] = 
         def makeArgs(model) = 

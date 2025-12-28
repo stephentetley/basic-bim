@@ -21,16 +21,7 @@ mod BasicBim.API.Context {
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
     use BasicBim.{IfcGen}
     use BasicBim.IfcGen.{freshvar, asks, pyAssign}
-    
-    pub def add_context1[r: RecordRow](context_type: {context_type = String}): IfcGen[(model = Expr | r), Expr] = 
-        def makeArgs(model: Expr) = 
-            List#{FunArg.Named("file", model),
-                    FunArg.Named("context_type", stringLiteral(context_type#context_type))};
-        forM (
-            var <- freshvar();
-            args <- asks(cx -> cx#model) <$$> makeArgs;
-            ans <- pyAssign(var, "ifcopenshell.api.context.add_context", args)
-        ) yield ans
+
 
    pub def add_context[r: RecordRow](context_type: {context_type = String},
                                     context_identifier: {context_identifier = String},
@@ -48,4 +39,15 @@ mod BasicBim.API.Context {
             ans <- pyAssign(var, "ifcopenshell.api.context.add_context", args)
         ) yield ans
 
+    
+    pub def add_context1[r: RecordRow](context_type: {context_type = String}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model: Expr) = 
+            List#{FunArg.Named("file", model),
+                    FunArg.Named("context_type", stringLiteral(context_type#context_type))};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.context.add_context", args)
+        ) yield ans
+        
 }
