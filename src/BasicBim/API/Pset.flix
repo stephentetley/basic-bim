@@ -36,7 +36,7 @@ mod BasicBim.API.Pset {
         ) yield ans
     
 
-    // Note `properties` should be a `Expr.Dict` , i.e. already transformed to Python values
+    // Note `properties` should be an `Expr.Dict`, i.e. already transformed to Python values
     pub def edit_pset[r: RecordRow](pset: {pset = Expr}, 
                                     properties: {properties = Expr}): IfcGen[(model = Expr, product = Expr | r), Expr] = 
         def makeArgs(model) = 

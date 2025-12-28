@@ -19,7 +19,7 @@ mod BasicBim.API.Geometry {
 
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral, otherLiteral, otherLiteralOrNone,
-                                listOrNone}
+                                boolLiteral, listOrNone}
     use BasicBim.{IfcGen}
     use BasicBim.IfcGen.{freshvar, asks, pyAssign}
     
@@ -61,6 +61,21 @@ mod BasicBim.API.Geometry {
             ans <- pyAssign(var, "ifcopenshell.api.geometry.assign_representation", args)
         ) yield ans
 
+    pub def edit_object_placement[r: RecordRow](product: {product = Expr}, 
+                                                matrix: {matrix = Expr}, 
+                                                is_si: {is_si = Bool}, 
+                                                should_transform_children: {should_transform_children = Bool}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model) = 
+            List#{FunArg.Named("file", model),
+                    FunArg.Named("product", product#product), 
+                    FunArg.Named("matrix", matrix#matrix), 
+                    FunArg.Named("is_si", boolLiteral(is_si#is_si)), 
+                    FunArg.Named("should_transform_children", boolLiteral(should_transform_children#should_transform_children))};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.geometry.edit_object_placement", args)
+        ) yield ans
 
 
 }
