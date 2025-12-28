@@ -61,7 +61,6 @@ mod BasicBim.Base.Syntax {
         case Apply(Expr, List[FunArg])
         case PyList(List[Expr])
         case Dict(List[(String, Expr)])
-        case PyNone
     }
     
     // Trait for Python literals?
@@ -74,15 +73,27 @@ mod BasicBim.Base.Syntax {
     
     pub def stringLiteralOrNone(x: Option[String]): Expr = match x {
         case Some(s) => stringLiteral(s)
-        case None    => Expr.PyNone
+        case None    => Expr.Lit("None")
     }
+
+    pub def stringLiteralNoneWhenEmpty(s: String): Expr = 
+        if (s != "") stringLiteral(s) else Expr.Lit("None")
+
+
+    pub def boolLiteral(b: Bool): Expr = if (b) Expr.Lit("True") else Expr.Lit("False")
+
+    pub def boolLiteralOrNone(b: Option[Bool]): Expr = match b {
+        case Some(b1) => boolLiteral(b1)
+        case None     => Expr.Lit("None")
+    }
+
 
     pub def otherLiteral(x: t): Expr with ToString[t] = Expr.Lit(ToString.toString(x))
 
     
     pub def otherLiteralOrNone(x: Option[t]): Expr with ToString[t] = match x {
         case Some(x1) => otherLiteral(x1)
-        case None     => Expr.PyNone
+        case None     => Expr.Lit("None")
     }
 
     instance Pretty[Expr] {
@@ -95,8 +106,6 @@ mod BasicBim.Base.Syntax {
             case Expr.PyList(xs)        => commaBrackets(List.map(Pretty.pPrintPrec(d, p), xs))
             case Expr.Dict(xs)          => 
                 commaBraces(List.map(match ((n,v)) -> squotes(text(n)) ++ char(':') <<>> Pretty.pPrintPrec(d, p, v), xs))
-
-            case Expr.PyNone            => text("None")
         }
     }
 

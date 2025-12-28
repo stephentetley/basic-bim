@@ -23,16 +23,30 @@ mod BasicBim.API.Pset {
     use BasicBim.IfcGen.{freshvar, asks, pyAssign}
     
     pub def add_pset[r: RecordRow](name: {name = String}, 
-                                    ifc2x3_subclass: {ifc2x3_subclass = Option[String]}): IfcGen[(model = Expr | r), Expr] = 
-        def makeArgs(model) = 
+                                    ifc2x3_subclass: {ifc2x3_subclass = Option[String]}): IfcGen[(model = Expr, product = Expr | r), Expr] = 
+        def makeArgs(model, product) = 
             List#{FunArg.Named("file", model), 
+                    FunArg.Named("product", product), 
                     FunArg.Named("name", stringLiteral(name#name)),
                     FunArg.Named("ifc2x3_subclass", stringLiteralOrNone(ifc2x3_subclass#ifc2x3_subclass))};
         forM (
             var <- freshvar();
-            args <- asks(cx -> cx#model) <$$> makeArgs;
-            ans <- pyAssign(var, "ifcopenshell.api.root.create_entity", args)
+            args <- Applicative.map2(makeArgs, asks(cx -> cx#model), asks(cx -> cx#product));
+            ans <- pyAssign(var, "ifcopenshell.api.pset.add_pset", args)
         ) yield ans
+    
 
+    // Note `properties` should be a `Expr.Dict` , i.e. already transformed to Python values
+    pub def edit_pset[r: RecordRow](pset: {pset = Expr}, 
+                                    properties: {properties = Expr}): IfcGen[(model = Expr, product = Expr | r), Expr] = 
+        def makeArgs(model) = 
+            List#{FunArg.Named("file", model), 
+                    FunArg.Named("pset", pset#pset),
+                    FunArg.Named("properties", properties#properties)};
+        forM (
+            var <- freshvar();
+            args <- asks(cx -> cx#model) <$$> makeArgs;
+            ans <- pyAssign(var, "ifcopenshell.api.pset.edit_pset", args)
+        ) yield ans
 
 }

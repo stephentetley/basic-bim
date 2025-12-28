@@ -74,7 +74,8 @@ pset_site_common = ifcopenshell.api.pset.add_pset(model, product=site, name="Pse
 ifcopenshell.api.pset.edit_pset(model, pset=pset_site_common, properties=site_common_properties)
 
 site_address_properties = {'PostalCode': "S61 4BL",
-                           'Country': 'GB'}
+                           'Country': 'GB',
+                           'Town': None}
 pset_address_site = ifcopenshell.api.pset.add_pset(model, product=site, name="Pset_Address")
 ifcopenshell.api.pset.edit_pset(model, pset=pset_address_site, properties=site_address_properties)
 
