@@ -24,11 +24,11 @@ mod BasicBim.API.Obj.File {
     
     pub def write[r: RecordRow](path: {path = String}, 
                                 format: {format = String}, 
-                                zipped: {zipped = String}): IfcGen[(model = Expr | r), Unit] = 
+                                zipped: {zipped = Bool}): IfcGen[(model = Expr | r), Unit] = 
         def makeArgs() = 
             List#{FunArg.Named("path", stringLiteral(path#path)),
                     FunArg.Named("format", stringLiteral(format#format)),
-                    FunArg.Named("zipped", stringLiteral(zipped#zipped))};
+                    FunArg.Named("zipped", boolLiteral(zipped#zipped))};
         forM (
             model <- asks(cx -> cx#model);
             _ <- pyObjInvoke(model, "write", makeArgs())

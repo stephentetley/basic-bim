@@ -20,27 +20,42 @@
 
 mod BasicBim.Model {
 
-
+    use Applicative.{<*}
     use BasicBim.Base.Syntax.{Stmt, Expr}
 
 
     use BasicBim.IfcGen
     use BasicBim.IfcGen.{runIfcGen, local, pyImport}
 
+    pub type alias BimContext[r: RecordRow] = {
+        python_imports = List[String]
 
-    // pub enum SourceContext
-    // pub enum ModelContext
+        | r
+    }
 
-    // // pub type alias Source[a] = IfcGen[SourceContext, a]
+    pub def initial_context(): BimContext[()] = {
+        python_imports =  List#{
+            "ifcopenshell.api.root", 
+            "ifcopenshell.api.unit",
+            "ifcopenshell.api.context",
+            "ifcopenshell.api.project",
+            "ifcopenshell.api.spatial",
+            "ifcopenshell.api.geometry",
+            "ifcopenshell.api.aggregate",
+            "ifcopenshell.api.owner",
+            "ifcopenshell.api.pset",
+            "ifcopenshell.api.style",
+            "numpy"
+        }
+    }
 
-    // pub enum ModelCx
-    // pub enum ProjectCx
-
-    // pub type alias Model[a] = IfcGen[ModelCx, a]
-    // pub type alias Project[a] = IfcGen[ProjectCx, a]
 
     pub def showPy(ctx: {| cx}, m: IfcGen[cx, a]): (String, a) = 
-        let (code, _, a) = runIfcGen(ctx, 1, m);
+        let prgm = forM (
+            _ <- Foldable.forEachM(pyImport, pyimports());
+            ans <- m
+        ) yield ans;
+        let (code, _, a) = runIfcGen(ctx, 1, prgm);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
 
@@ -63,11 +78,11 @@ mod BasicBim.Model {
 
 
 
-    pub def model[r: RecordRow, a: Type](version: String, _ifcfile: String, body: IfcGen[(model = Expr | r), a]): IfcGen[( | r), a] = 
+    pub def model[r: RecordRow, a: Type](version: String, ifcfile: String, body: IfcGen[(model = Expr | r), a]): IfcGen[( | r), a] = 
+        let writeFile = BasicBim.API.Obj.File.write(path = ifcfile, format = ".ifc", zipped = false);
         forM (
-            _ <- Foldable.forEachM(pyImport, pyimports());
             model <- BasicBim.API.Project.create_file(version=version);
-            ans <- local(cx -> {+model=model| cx}, body)
+            ans <- local(cx -> {+model=model| cx}, body <* writeFile)
         ) yield ans
 
 
