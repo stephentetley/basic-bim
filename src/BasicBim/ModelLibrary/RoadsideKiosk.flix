@@ -22,9 +22,11 @@ mod BasicBim.ModelLibrary.RoadsideKiosk {
     use BasicBim.Model
     use BasicBim.Model.{ifcBuilding, ifcBuildingStorey, getColour}
 
+
+    // TODO - shading style should be lifted out so it can be defined just once...
     pub def roadsideKiosk(name: String): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), Unit] = 
         ifcBuilding(name, forM (
-            _green <- Model.getColour(BasicBim.Colour.NamedColours.darkseagreen());
+            _style <- Model.ifcSurfaceStyleShading("RKiosk Shading Style", BasicBim.Colour.NamedColours.darkseagreen(), 0.1f64);
             _ <- ifcBuildingStorey("${name} Storey1", forM (
                     
                     _ <- Applicative.point("todo")

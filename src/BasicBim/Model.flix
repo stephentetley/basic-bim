@@ -21,11 +21,12 @@
 mod BasicBim.Model {
 
     use Applicative.{<*, *>}
-    use BasicBim.Base.Syntax.{Stmt, Expr}
+    use BasicBim.Base.Syntax.{Stmt, Expr, otherLiteral}
     use BasicBim.IfcGen
     use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim, pyAssignExpr}
     use BasicBim.Colour.NamedColours.{NamedColour}
     use BasicBim.Pset.Address
+    use BasicBim.Pset.SiteCommon
 
     // TODO - having a context would allow users to extend imports 
     // and builtin functions (verbatims)
@@ -167,12 +168,7 @@ mod BasicBim.Model {
             ) yield ans1)
         ) yield ans        
 
-
-    pub def getColour(colour: NamedColour): IfcGen[cx, Expr] = 
-        forM (
-            var <- BasicBim.IfcGen.freshvarWithPrefix("colour");
-            ans <- pyAssignExpr(var, BasicBim.Colour.NamedColours.toExpr(colour))
-        ) yield ans
+    // Psets
 
     pub def setSiteAddress[r: RecordRow](f: Address.Pset_AddressSetter): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), Expr] = 
         let props = BasicBim.Pset.Address.pset_Address(f) |> BasicBim.Pset.Address.toExpr;
@@ -182,5 +178,28 @@ mod BasicBim.Model {
             _       <- BasicBim.API.Pset.edit_pset(pset= pset1, properties=props)
         ) yield pset1
 
+    pub def setSiteCommon[r: RecordRow](f: SiteCommon.Pset_SiteCommonSetter): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), Expr] = 
+        let props = BasicBim.Pset.SiteCommon.pset_SiteCommon(f) |> BasicBim.Pset.SiteCommon.toExpr;
+        forM (
+            site    <- asks(cx -> cx#ifcsite);
+            pset1   <- BasicBim.API.Pset.add_pset(product=site, name="Pset_SiteCommon", ifc2x3_subclass=None);
+            _       <- BasicBim.API.Pset.edit_pset(pset= pset1, properties=props)
+        ) yield pset1
 
+
+
+
+    def getColour(colour: NamedColour): IfcGen[cx, Expr] = 
+        forM (
+            var <- BasicBim.IfcGen.freshvarWithPrefix("colour");
+            ans <- pyAssignExpr(var, BasicBim.Colour.NamedColours.toExpr(colour))
+        ) yield ans
+
+    pub def ifcSurfaceStyleShading[r: RecordRow](style_name: String, surface_colour: NamedColour, transparency: Float64): IfcGen[(model = Expr | r), Expr] = 
+        forM (
+            sty     <- BasicBim.API.Style.add_style(name = style_name, ifc_class = "IfcSurfaceStyle");            
+            rgb     <- getColour(surface_colour);
+            attrs   <- Applicative.point(Expr.Dict(List#{("SurfaceColour", rgb), ("Transparency", otherLiteral(transparency))}));
+            _       <- BasicBim.API.Style.add_surface_style(style = sty, ifc_class = "IfcSurfaceStyleShading", attributes=attrs)
+        ) yield sty
 }

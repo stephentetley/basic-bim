@@ -28,7 +28,7 @@ mod BasicBim.Util.Placement {
                     FunArg.Named("axis", stringLiteral(axis#axis))};
         forM (
             var <- freshvar();
-            ans <- pyAssign(var, "ifcopenshell.util.placemenet.rotation", makeArgs())
+            ans <- pyAssign(var, "ifcopenshell.util.placement.rotation", makeArgs())
         ) yield ans
 
 }
