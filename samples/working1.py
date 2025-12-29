@@ -57,17 +57,7 @@ body = ifcopenshell.api.context.add_context(model, context_type="Model",
 
 
 site = ifcopenshell.api.root.create_entity(model, ifc_class="IfcSite", name="Addley West STW")
-mcc_kiosk = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="MCC Kiosk")
-mcc_kiosk_storey1 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="MCC Kiosk Storey")
-admin_building = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="Admin Building")
-admin_building_storey1 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Admin Ground Floor")
-admin_building_storey2 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Admin First Floor")
-
 ifcopenshell.api.aggregate.assign_object(model, relating_object=project, products=[site])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[mcc_kiosk])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=mcc_kiosk, products=[mcc_kiosk_storey1])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[admin_building])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=admin_building, products=[admin_building_storey1, admin_building_storey2])
 
 site_common_properties = {'TotalArea': 1492}
 pset_site_common = ifcopenshell.api.pset.add_pset(model, product=site, name="Pset_SiteCommon")
@@ -78,6 +68,25 @@ site_address_properties = {'PostalCode': "S61 4BL",
                            'Town': None}
 pset_address_site = ifcopenshell.api.pset.add_pset(model, product=site, name="Pset_Address")
 ifcopenshell.api.pset.edit_pset(model, pset=pset_address_site, properties=site_address_properties)
+
+
+
+mcc_kiosk = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="MCC Kiosk")
+ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[mcc_kiosk])
+
+mcc_kiosk_storey1 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="MCC Kiosk Storey")
+ifcopenshell.api.aggregate.assign_object(model, relating_object=mcc_kiosk, products=[mcc_kiosk_storey1])
+
+admin_building = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="Admin Building")
+ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[admin_building])
+
+admin_building_storey1 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Admin Ground Floor")
+ifcopenshell.api.aggregate.assign_object(model, relating_object=admin_building, products=[admin_building_storey1])
+
+admin_building_storey2 = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Admin First Floor")
+ifcopenshell.api.aggregate.assign_object(model, relating_object=admin_building, products=[admin_building_storey2])
+
+
 
 
 mcc_kiosk_front_wall = ifcopenshell.api.root.create_entity(model, ifc_class='IfcWall', name='MCC Kiosk Front Wall', predefined_type='NOTDEFINED')

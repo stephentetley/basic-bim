@@ -17,7 +17,7 @@
 mod Test01 {
 
     use BasicBim.IfcGen
-    use BasicBim.Model.{model, ifcProject}
+    use BasicBim.Model.{model, ifcProject, ifcSite}
 
     @test
     def test01(): Unit \ IO = 
@@ -31,7 +31,7 @@ mod Test01 {
                     _       <- BasicBim.API.Owner.add_application(application_developer=p1, version="0.0.1", application_full_name="basic-bim", application_identifier="basic-bim");
                     rcx     <- BasicBim.API.Context.add_context1(context_type="Model");
                     _bcx    <- BasicBim.API.Context.add_context(context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=rcx);
-                    ans     <- Applicative.point("Done")
+                    ans     <- ifcSite("Addley West STW", Applicative.point("Done"))
                 ) yield ans)));
         println(py);
         ()

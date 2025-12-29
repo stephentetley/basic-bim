@@ -97,7 +97,7 @@ mod BasicBim.IfcGen {
     def nextLabel(prefix: String, namescount: Map[String, Int32]): (String, Map[String, Int32]) = 
         match Map.get(prefix, namescount) {
             case Some(i) => ("${prefix}${i}", Map.adjust(x -> x + 1, prefix, namescount))
-            case None    => ("${prefix}1",    Map.insert(prefix, 1, namescount))
+            case None    => ("${prefix}1",    Map.insert(prefix, 2, namescount))
         }
 
     pub def freshvar(): IfcGen[cx, Expr] \ {} = freshvarWithPrefix("v")

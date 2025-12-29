@@ -20,12 +20,12 @@
 
 mod BasicBim.Model {
 
-    use Applicative.{<*}
+    use Applicative.{<*, *>}
     use BasicBim.Base.Syntax.{Stmt, Expr}
 
 
     use BasicBim.IfcGen
-    use BasicBim.IfcGen.{runIfcGen, local, pyImport, verbatim}
+    use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim}
 
 
     // TODO - having a context would allow users to extend imports 
@@ -137,7 +137,11 @@ mod BasicBim.Model {
                                             body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr | r), a] =
         forM (
             vsite <- BasicBim.API.Root.create_entity(ifc_class = "IfcSite", name = name);
-            ans <- local(cx -> {+ifcsite=vsite| cx}, body)
+            ans <- local(cx -> {+ifcsite=vsite| cx}, forM (
+                prj <- asks(cx -> cx#ifcproject);
+                _ <- BasicBim.API.Aggregate.assign_object(products=List#{vsite}, relating_object=prj);
+                ans1 <- body
+            ) yield ans1)
         ) yield ans
 
 

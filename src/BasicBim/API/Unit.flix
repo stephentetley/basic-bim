@@ -21,7 +21,7 @@ mod BasicBim.API.Unit {
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral, stringLiteralNoneWhenEmpty}
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{freshvar, asks, pyAssign}
+    use BasicBim.IfcGen.{freshvar, asks, pyAssign, pyInvoke}
     
     pub def add_si_unit[r: RecordRow](unit_type: {unit_type = String}, 
                                         prefix: {prefix = String}): IfcGen[(model = Expr | r), Expr] = 
@@ -35,14 +35,13 @@ mod BasicBim.API.Unit {
             ans <- pyAssign(var, "ifcopenshell.api.unit.add_si_unit", args)
         ) yield ans
     
-    pub def assign_unit[r: RecordRow](units: {units = List[Expr]}): IfcGen[(model = Expr | r), Expr] = 
+    pub def assign_unit[r: RecordRow](units: {units = List[Expr]}): IfcGen[(model = Expr | r), Unit] = 
         def makeArgs(model) = 
             List#{FunArg.Named("file", model),
                     FunArg.Named("units", Expr.PyList(units#units))};
         forM (
-            var <- freshvar();
             args <- asks(cx -> cx#model) <$$> makeArgs;
-            ans <- pyAssign(var, "ifcopenshell.api.unit.assign_unit", args)
+            ans <- pyInvoke("ifcopenshell.api.unit.assign_unit", args)
         ) yield ans
 
 }
