@@ -16,9 +16,10 @@
 
 
 mod BasicBim.API.Unit {
+    use BasicBim.IfcGen.freshvarWithPrefix
 
     use Functor.{<$$>}
-    use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
+    use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral, stringLiteralNoneWhenEmpty}
     use BasicBim.{IfcGen}
     use BasicBim.IfcGen.{freshvar, asks, pyAssign}
     
@@ -27,9 +28,9 @@ mod BasicBim.API.Unit {
         def makeArgs(model) = 
             List#{FunArg.Named("file", model),
                     FunArg.Named("unit_type", stringLiteral(unit_type#unit_type)), 
-                    FunArg.Named("prefix", stringLiteral(prefix#prefix))};
+                    FunArg.Named("prefix", stringLiteralNoneWhenEmpty(prefix#prefix))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("siu");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.unit.add_si_unit", args)
         ) yield ans

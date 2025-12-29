@@ -20,7 +20,7 @@ mod BasicBim.API.Context {
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{freshvar, asks, pyAssign}
+    use BasicBim.IfcGen.{asks, pyAssign}
 
 
    pub def add_context[r: RecordRow](context_type: {context_type = String},
@@ -34,7 +34,7 @@ mod BasicBim.API.Context {
                     FunArg.Named("target_view", stringLiteral(target_view#target_view)),
                     FunArg.Named("parent", parent#parent)};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("ctx");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.context.add_context", args)
         ) yield ans
@@ -45,7 +45,7 @@ mod BasicBim.API.Context {
             List#{FunArg.Named("file", model),
                     FunArg.Named("context_type", stringLiteral(context_type#context_type))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("ctx");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.context.add_context", args)
         ) yield ans

@@ -34,7 +34,7 @@ mod BasicBim.API.Owner {
                     FunArg.Named("application_full_name", stringLiteral(application_full_name#application_full_name)),
                     FunArg.Named("application_identifier", stringLiteral(application_identifier#application_identifier))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("app");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.owner.add_application", args)
         ) yield ans
@@ -47,7 +47,7 @@ mod BasicBim.API.Owner {
                     FunArg.Named("identification", stringLiteral(identification#identification)), 
                     FunArg.Named("name", stringLiteral(name#name))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("org");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.owner.add_organisation", args)
         ) yield ans
@@ -61,7 +61,7 @@ mod BasicBim.API.Owner {
                     FunArg.Named("family_name", stringLiteral(family_name#family_name)),
                     FunArg.Named("given_name", stringLiteral(given_name#given_name))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("person");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.owner.add_person", args)
         ) yield ans

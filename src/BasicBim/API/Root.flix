@@ -29,7 +29,7 @@ mod BasicBim.API.Root {
                     FunArg.Named("ifc_class", stringLiteral(ifc_class#ifc_class)), 
                     FunArg.Named("name", stringLiteral(name#name))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("entity");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.root.create_entity", args)
         ) yield ans

@@ -27,6 +27,10 @@ mod BasicBim.Model {
     use BasicBim.IfcGen
     use BasicBim.IfcGen.{runIfcGen, local, pyImport, verbatim}
 
+
+    // TODO - having a context would allow users to extend imports 
+    // and builtin functions (verbatims)
+
     // pub type alias BimContext[r: RecordRow] = {
     //     python_imports = List[String]
 
@@ -72,7 +76,7 @@ mod BasicBim.Model {
             _ <- blank();
             ans <- m
         ) yield ans;
-        let (code, _, a) = runIfcGen(mctx, Map#{"v" => 1}, prgm);
+        let (code, _, a) = runIfcGen(mctx, Map.empty(), prgm);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
 
