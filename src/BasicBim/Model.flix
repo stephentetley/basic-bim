@@ -49,6 +49,18 @@ mod BasicBim.Model {
     //     }
     // }
 
+    pub def writePy(path: String, mctx: {| cx}, m: IfcGen[cx, a]): (String, a) \ IO = 
+        let (pycode, a) = showPy(mctx, m);
+        run {
+            match FileWriteWithResult.write(str = pycode, path){
+                case Result.Ok(_)    => ()
+                case Result.Err(err) =>
+                    println("Unable to write file. Error: ${err}")
+            }
+        } with FileWriteWithResult.runWithIO;
+        (pycode, a)
+
+
 
     pub def showPy(mctx: {| cx}, m: IfcGen[cx, a]): (String, a) = 
         let prgm = forM (

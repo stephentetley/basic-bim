@@ -17,13 +17,18 @@
 mod Test01 {
 
     use BasicBim.IfcGen
-    use BasicBim.Model.{showPy, model}
+    use BasicBim.Model.{model, ifcProject}
 
     @test
     def test01(): Unit \ IO = 
         let p = BasicBim.IfcGen.point(10);
-        let (py, _) = 
-            model("IFC4X3", "./output/basic_bim01.ifc", p) |> showPy({});
+        let (py, _) = BasicBim.Model.writePy("./test/output/basic_bim01.py",{}, 
+            model("IFC4X3", "./output/basic_bim01.ifc", 
+                ifcProject("Addley West Project", forM(
+                    p1 <- BasicBim.API.Owner.add_person(identification="tetleys", family_name="Tetley", given_name="Stephen");
+                    _ <- BasicBim.API.Owner.add_application(application_developer=p1, version="0.0.1", application_full_name="basic-bim", application_identifier="basic-bim");
+                    ans <- p
+                ) yield ans)));
         println(py);
         ()
 
