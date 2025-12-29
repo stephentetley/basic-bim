@@ -59,6 +59,7 @@ mod BasicBim.Base.Syntax {
         case Lit(String)
         case Var(String)
         case Apply(Expr, List[FunArg])
+        case ObjApply(Expr, String, List[FunArg])
         case PyList(List[Expr])
         case Dict(List[(String, Expr)])
     }
@@ -108,6 +109,9 @@ mod BasicBim.Base.Syntax {
             case Expr.Var(s)            => text(s)
             case Expr.Apply(funE, args) => 
                 Pretty.pPrintPrec(d, p, funE) ++ tupled(List.map(Pretty.pPrintPrec(d, p), args))
+
+            case Expr.ObjApply(obj, mname, args) => 
+                Pretty.pPrintPrec(d, p, obj) ++ char('.') ++ text(mname) ++ tupled(List.map(Pretty.pPrintPrec(d, p), args))
 
             case Expr.PyList(xs)        => commaBrackets(List.map(Pretty.pPrintPrec(d, p), xs))
             case Expr.Dict(xs)          => 

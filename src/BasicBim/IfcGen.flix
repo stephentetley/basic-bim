@@ -104,6 +104,8 @@ mod BasicBim.IfcGen {
     pub def pyInvoke(fname: String, args: List[FunArg]): IfcGen[cx, Unit] \ {} =
         tell(Stmt.ExprStmt(Expr.Apply(Expr.Lit(fname), args)))
 
+    pub def pyObjInvoke(obj: Expr, mname: String, args: List[FunArg]): IfcGen[cx, Unit] \ {} =
+        tell(Stmt.ExprStmt(Expr.ObjApply(obj, mname, args)))
 
     pub def pyAssign(v: Expr, fname: String, args: List[FunArg]): IfcGen[cx, Expr] \ {} =
         forM(
