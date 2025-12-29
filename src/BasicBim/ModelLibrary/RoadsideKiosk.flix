@@ -20,12 +20,13 @@ mod BasicBim.ModelLibrary.RoadsideKiosk {
     use BasicBim.IfcGen
     use BasicBim.Base.Syntax.{Expr}
     use BasicBim.Model
-    use BasicBim.Model.{ifcBuilding, ifcBuildingStorey}
+    use BasicBim.Model.{ifcBuilding, ifcBuildingStorey, getColour}
 
     pub def roadsideKiosk(name: String): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), Unit] = 
         ifcBuilding(name, forM (
+            _green <- Model.getColour(BasicBim.Colour.NamedColours.darkseagreen());
             _ <- ifcBuildingStorey("${name} Storey1", forM (
-                    _green <- Model.assignColour(BasicBim.Colour.NamedColours.darkseagreen());
+                    
                     _ <- Applicative.point("todo")
                     ) yield())
         ) yield ())

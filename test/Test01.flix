@@ -34,6 +34,7 @@ mod Test01 {
                     rcx     <- BasicBim.API.Context.add_context1(context_type="Model");
                     _bcx    <- BasicBim.API.Context.add_context(context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=rcx);
                     ans     <- ifcSite("Addley West STW", forM (
+                            _         <- BasicBim.Model.setSiteAddress(r -> { country =  "GB", postal_code = "S61 4BL" | r});
                             _mcckiosk <- RoadsideKiosk.roadsideKiosk("MCC Kiosk");
                             _adminblg <- ifcBuilding("Admin Building", forM (
                                     _ <- ifcBuildingStorey("Admin Ground Floor", point());

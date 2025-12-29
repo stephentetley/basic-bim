@@ -25,6 +25,7 @@ mod BasicBim.Model {
     use BasicBim.IfcGen
     use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim, pyAssignExpr}
     use BasicBim.Colour.NamedColours.{NamedColour}
+    use BasicBim.Pset.Address
 
     // TODO - having a context would allow users to extend imports 
     // and builtin functions (verbatims)
@@ -167,9 +168,19 @@ mod BasicBim.Model {
         ) yield ans        
 
 
-    pub def assignColour(colour: NamedColour): IfcGen[cx, Expr] = 
+    pub def getColour(colour: NamedColour): IfcGen[cx, Expr] = 
         forM (
             var <- BasicBim.IfcGen.freshvarWithPrefix("colour");
             ans <- pyAssignExpr(var, BasicBim.Colour.NamedColours.toExpr(colour))
         ) yield ans
+
+    pub def setSiteAddress[r: RecordRow](f: Address.Pset_AddressSetter): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), Expr] = 
+        let props = BasicBim.Pset.Address.pset_Address(f) |> BasicBim.Pset.Address.toExpr;
+        forM (
+            site    <- asks(cx -> cx#ifcsite);
+            pset1   <- BasicBim.API.Pset.add_pset(product=site, name="Pset_Address", ifc2x3_subclass=None);
+            _       <- BasicBim.API.Pset.edit_pset(pset= pset1, properties=props)
+        ) yield pset1
+
+
 }

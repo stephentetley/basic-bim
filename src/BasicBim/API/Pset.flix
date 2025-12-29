@@ -20,33 +20,33 @@ mod BasicBim.API.Pset {
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral, stringLiteralOrNone}
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{freshvar, asks, pyAssign}
+    use BasicBim.IfcGen.{freshvar, asks, pyAssign, pyInvoke}
     
-    pub def add_pset[r: RecordRow](name: {name = String}, 
-                                    ifc2x3_subclass: {ifc2x3_subclass = Option[String]}): IfcGen[(model = Expr, product = Expr | r), Expr] = 
-        def makeArgs(model, product) = 
+    pub def add_pset[r: RecordRow](product: {product = Expr}, 
+                                    name: {name = String}, 
+                                    ifc2x3_subclass: {ifc2x3_subclass = Option[String]}): IfcGen[(model = Expr | r), Expr] = 
+        def makeArgs(model) = 
             List#{FunArg.Named("file", model), 
-                    FunArg.Named("product", product), 
+                    FunArg.Named("product", product#product), 
                     FunArg.Named("name", stringLiteral(name#name)),
                     FunArg.Named("ifc2x3_subclass", stringLiteralOrNone(ifc2x3_subclass#ifc2x3_subclass))};
         forM (
-            var <- freshvar();
-            args <- Applicative.map2(makeArgs, asks(cx -> cx#model), asks(cx -> cx#product));
+            var <- BasicBim.IfcGen.freshvarWithPrefix("pset");
+            args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.pset.add_pset", args)
         ) yield ans
     
 
     // Note `properties` should be an `Expr.Dict`, i.e. already transformed to Python values
     pub def edit_pset[r: RecordRow](pset: {pset = Expr}, 
-                                    properties: {properties = Expr}): IfcGen[(model = Expr, product = Expr | r), Expr] = 
+                                    properties: {properties = Expr}): IfcGen[(model = Expr| r), Unit] = 
         def makeArgs(model) = 
             List#{FunArg.Named("file", model), 
                     FunArg.Named("pset", pset#pset),
                     FunArg.Named("properties", properties#properties)};
         forM (
-            var <- freshvar();
             args <- asks(cx -> cx#model) <$$> makeArgs;
-            ans <- pyAssign(var, "ifcopenshell.api.pset.edit_pset", args)
-        ) yield ans
+            _ <- pyInvoke("ifcopenshell.api.pset.edit_pset", args)
+        ) yield ()
 
 }
