@@ -112,4 +112,12 @@ mod BasicBim.IfcGen {
             _ <- tell(Stmt.Assign(v, Expr.Apply(Expr.Lit(fname), args)))
         ) yield v
 
+    pub def verbatim(s: String): IfcGen[cx, Unit] \ {} =
+        tell(Stmt.Verbatim(String.lines(s)))
+
+
+    pub def pyComment(s: String): IfcGen[cx, Unit] \ {} =
+        let xs = String.lines(s) |> List.map(String.concat("# "));
+        tell(Stmt.Verbatim(xs))
+
 }

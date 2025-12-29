@@ -21,7 +21,7 @@ mod BasicBim.Base.Syntax {
     use Text.PrettyPrint
     use Text.PrettyLevel
     use Text.PrettyPrint.Doc
-    use Text.PrettyPrint.{<<>>}
+    use Text.PrettyPrint.{<<>>, <&> }
     use Text.PrettyPrint.{empty, int32, squotes, encloseSep, text, char, comma, dot,
         intersperse, lparen, rparen, parens, tupled, commaBrackets, commaBraces, vcat, nest}
 
@@ -38,20 +38,25 @@ mod BasicBim.Base.Syntax {
             StringBuilder.toString(sb)
         }
 
+    // Verbatim is for comments and including code blocks
     pub enum Stmt with ToString {
         case Import(String)
         case Assign(Expr, Expr)
         case ExprStmt(Expr)
+        case Verbatim(List[String])
     }
     
     instance Pretty[Stmt] {
         pub override def pPrint(x: Stmt): Doc = 
             let stdlevel = Text.prettyNormal();
             match x {
-                case Stmt.Import(s)      => text("import") <<>> text(s)
-                case Stmt.Assign(e1, e2) => 
+                case Stmt.Import(s)         => text("import") <<>> text(s)
+                case Stmt.Assign(e1, e2)    => 
                     Pretty.pPrintPrec(stdlevel, 10, e1) <<>> char('=') <<>> Pretty.pPrintPrec(stdlevel, 10, e2)
-                case Stmt.ExprStmt(e)    => Pretty.pPrintPrec(stdlevel, 10, e)
+
+                case Stmt.ExprStmt(e)       => Pretty.pPrintPrec(stdlevel, 10, e)
+                case Stmt.Verbatim(lines)   => 
+                    Text.PrettyPrint.foldDocs((d1, d2) -> d1 <&> d2, List.map(text, lines))
             }
     }
 

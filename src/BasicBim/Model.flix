@@ -25,42 +25,48 @@ mod BasicBim.Model {
 
 
     use BasicBim.IfcGen
-    use BasicBim.IfcGen.{runIfcGen, local, pyImport}
+    use BasicBim.IfcGen.{runIfcGen, local, pyImport, verbatim}
 
-    pub type alias BimContext[r: RecordRow] = {
-        python_imports = List[String]
+    // pub type alias BimContext[r: RecordRow] = {
+    //     python_imports = List[String]
 
-        | r
-    }
+    //     | r
+    // }
 
-    pub def initial_context(): BimContext[()] = {
-        python_imports =  List#{
-            "ifcopenshell.api.root", 
-            "ifcopenshell.api.unit",
-            "ifcopenshell.api.context",
-            "ifcopenshell.api.project",
-            "ifcopenshell.api.spatial",
-            "ifcopenshell.api.geometry",
-            "ifcopenshell.api.aggregate",
-            "ifcopenshell.api.owner",
-            "ifcopenshell.api.pset",
-            "ifcopenshell.api.style",
-            "numpy"
-        }
-    }
+    // pub def initial_context(): BimContext[()] = {
+    //     python_imports =  List#{
+    //         "ifcopenshell.api.root", 
+    //         "ifcopenshell.api.unit",
+    //         "ifcopenshell.api.context",
+    //         "ifcopenshell.api.project",
+    //         "ifcopenshell.api.spatial",
+    //         "ifcopenshell.api.geometry",
+    //         "ifcopenshell.api.aggregate",
+    //         "ifcopenshell.api.owner",
+    //         "ifcopenshell.api.pset",
+    //         "ifcopenshell.api.style",
+    //         "numpy"
+    //     }
+    // }
 
 
-    pub def showPy(ctx: {| cx}, m: IfcGen[cx, a]): (String, a) = 
+    pub def showPy(mctx: {| cx}, m: IfcGen[cx, a]): (String, a) = 
         let prgm = forM (
             _ <- Foldable.forEachM(pyImport, pyimports());
+            _ <- blank();
+            _ <- verbatim(make_placement_matrix());
+            _ <- blank();
+            _ <- verbatim(make_placement_angle_matrix());
+            _ <- blank();
             ans <- m
         ) yield ans;
-        let (code, _, a) = runIfcGen(ctx, 1, prgm);
+        let (code, _, a) = runIfcGen(mctx, 1, prgm);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
 
+    def blank(): IfcGen[cx, Unit] = verbatim("")
 
-    // TODO put these in a record as part of inital context...
+    // TODO put these in a record as part of inital context?
     def pyimports(): List[String] = 
         List#{
             "ifcopenshell.api.root", 
@@ -75,6 +81,21 @@ mod BasicBim.Model {
             "ifcopenshell.api.style",
             "numpy"
         }
+
+    def make_placement_matrix(): String = 
+        String.unlines(List#{
+            "def make_placement_matrix(x, y, z):",
+            "    matrix = numpy.eye(4)",
+            "    matrix[:,3][0:3] = (x, y, z)",
+            "    return matrix"})
+
+    def make_placement_angle_matrix(): String = 
+        String.unlines(List#{
+            "def make_placement_angle_matrix(deg, x, y, z):",
+            "    matrix = numpy.eye(4)",
+            "    matrix = ifcopenshell.util.placement.rotation(deg, 'Z') @ matrix",
+            "    matrix[:,3][0:3] = (x, y, z)",
+            "    return matrix"})
 
 
 
