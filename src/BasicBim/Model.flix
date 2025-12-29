@@ -72,7 +72,7 @@ mod BasicBim.Model {
             _ <- blank();
             ans <- m
         ) yield ans;
-        let (code, _, a) = runIfcGen(mctx, 1, prgm);
+        let (code, _, a) = runIfcGen(mctx, Map#{"v" => 1}, prgm);
         let pycode = BasicBim.Base.Syntax.ppCode(code);
         (pycode, a)
 

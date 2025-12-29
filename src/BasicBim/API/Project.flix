@@ -19,12 +19,12 @@ mod BasicBim.API.Project {
 
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}
     use BasicBim.{IfcGen}
-    use BasicBim.IfcGen.{freshvar, pyAssign}
+    use BasicBim.IfcGen.{pyAssign}
     
     pub def create_file(version: {version = String}): IfcGen[cx, Expr] = 
         let args = List#{FunArg.Named("version", stringLiteral(version#version))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("model");
             ans <- pyAssign(var, "ifcopenshell.api.project.create_file", args)
         ) yield ans
 

@@ -18,10 +18,9 @@ mod BasicBim {
 
     use BasicBim.Base.Syntax.Code
 
-    // Could change state to a Map[String, Int32] to allow more 
-    // meaningful variable names
+    // Use state of Map[String, Int32] to allow more meaningful variable names
 
-    pub enum IfcGen[r: RecordRow, a: Type](({| r}, Code, Int32) -> (Code, Int32, a))
+    pub enum IfcGen[r: RecordRow, a: Type](({| r}, Code, Map[String, Int32]) -> (Code, Map[String, Int32], a))
 
     instance Functor[IfcGen[cx]] {
         pub def map(f: a -> b \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef = 
@@ -46,7 +45,7 @@ mod BasicBim.IfcGen {
 
     use BasicBim.Base.Syntax.{Code, Stmt, Expr, FunArg}
 
-    pub def runIfcGen(ctx: {| r}, st: Int32, f: IfcGen[r, a]): (Code, Int32, a) = 
+    pub def runIfcGen(ctx: {| r}, st: Map[String, Int32], f: IfcGen[r, a]): (Code, Map[String, Int32], a) = 
         let IfcGen(f1) = f;
         f1(ctx, Chain.empty(), st)
 
@@ -55,9 +54,9 @@ mod BasicBim.IfcGen {
         IfcGen((_, code, i) -> (code, i, x))
 
     pub def map(f: a -> b \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef =
-        unchecked_cast(IfcGen((cx, code, i) -> 
-            let (w, s1, a) = runIfcGen(cx, i, x);
-            (Chain.append(code, w), s1, unchecked_cast(f(a) as _ \ {}))
+        unchecked_cast(IfcGen((cx, code, st) -> 
+            let (w, st1, a) = runIfcGen(cx, st, x);
+            (Chain.append(code, w), st1, unchecked_cast(f(a) as _ \ {}))
         ) as _ \ ef)
 
     pub def ap(f: IfcGen[cx, a -> b \ ef], x: IfcGen[cx, a]): IfcGen[cx, b] \ ef =
@@ -95,8 +94,19 @@ mod BasicBim.IfcGen {
             (Chain.append(code, w1), s1, a)
         ) as _ \ ef)
 
-    pub def freshvar(): IfcGen[cx, Expr] \ {} =
-        IfcGen((_, code, i) -> (code, i+1, Expr.Var("v" + ToString.toString(i))))
+    def nextLabel(prefix: String, namescount: Map[String, Int32]): (String, Map[String, Int32]) = 
+        match Map.get(prefix, namescount) {
+            case Some(i) => ("${prefix}${i}", Map.adjust(x -> x + 1, prefix, namescount))
+            case None    => (prefix, Map.insert(prefix, 1, namescount))
+        }
+
+    pub def freshvar(): IfcGen[cx, Expr] \ {} = freshvarWithPrefix("v")
+
+    pub def freshvarWithPrefix(prefix: String): IfcGen[cx, Expr] \ {} =
+        IfcGen((_, code, st) -> { 
+            let (label, st1) = nextLabel(prefix, st);
+            (code, st1, Expr.Var(label))
+        })
     
     pub def pyImport(name: String): IfcGen[cx, Unit] \ {} =
         tell(BasicBim.Base.Syntax.Stmt.Import(name))
