@@ -122,6 +122,11 @@ mod BasicBim.IfcGen {
             _ <- tell(Stmt.Assign(v, Expr.Apply(Expr.Lit(fname), args)))
         ) yield v
 
+    pub def pyAssignExpr(v: Expr, rhs: Expr): IfcGen[cx, Expr] \ {} =
+        forM(
+            _ <- tell(Stmt.Assign(v, rhs))
+        ) yield v
+
     pub def verbatim(s: String): IfcGen[cx, Unit] \ {} =
         tell(Stmt.Verbatim(String.lines(s)))
 

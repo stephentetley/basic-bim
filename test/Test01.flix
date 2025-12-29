@@ -16,8 +16,10 @@
 
 mod Test01 {
 
+    use Applicative.{point}
     use BasicBim.IfcGen
-    use BasicBim.Model.{model, ifcProject, ifcSite}
+    use BasicBim.Model.{model, ifcProject, ifcSite, ifcBuilding, ifcBuildingStorey}
+    use BasicBim.ModelLibrary.RoadsideKiosk
 
     @test
     def test01(): Unit \ IO = 
@@ -31,7 +33,13 @@ mod Test01 {
                     _       <- BasicBim.API.Owner.add_application(application_developer=p1, version="0.0.1", application_full_name="basic-bim", application_identifier="basic-bim");
                     rcx     <- BasicBim.API.Context.add_context1(context_type="Model");
                     _bcx    <- BasicBim.API.Context.add_context(context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=rcx);
-                    ans     <- ifcSite("Addley West STW", Applicative.point("Done"))
+                    ans     <- ifcSite("Addley West STW", forM (
+                            _mcckiosk <- RoadsideKiosk.roadsideKiosk("MCC Kiosk");
+                            _adminblg <- ifcBuilding("Admin Building", forM (
+                                    _ <- ifcBuildingStorey("Admin Ground Floor", point());
+                                    _ <- ifcBuildingStorey("Admin First Floor", point())
+                                    ) yield ())
+                            ) yield ())
                 ) yield ans)));
         println(py);
         ()

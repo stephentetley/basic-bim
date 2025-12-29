@@ -22,11 +22,9 @@ mod BasicBim.Model {
 
     use Applicative.{<*, *>}
     use BasicBim.Base.Syntax.{Stmt, Expr}
-
-
     use BasicBim.IfcGen
-    use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim}
-
+    use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim, pyAssignExpr}
+    use BasicBim.Colour.NamedColours.{NamedColour}
 
     // TODO - having a context would allow users to extend imports 
     // and builtin functions (verbatims)
@@ -149,7 +147,11 @@ mod BasicBim.Model {
                                                 body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr | r), a] =
         forM (
             vbuilding <- BasicBim.API.Root.create_entity(ifc_class = "IfcBuilding", name = name);
-            ans <- local(cx -> {+ifcbuilding=vbuilding| cx}, body)
+            ans <- local(cx -> {+ifcbuilding=vbuilding| cx}, forM (
+                site <- asks(cx -> cx#ifcsite);
+                _ <- BasicBim.API.Aggregate.assign_object(products=List#{vbuilding}, relating_object=site);
+                ans1 <- body
+            ) yield ans1)
         ) yield ans
 
 
@@ -157,8 +159,17 @@ mod BasicBim.Model {
                                                     body: IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr, ifcbuildingstorey = Expr | r), a]): IfcGen[(model = Expr, ifcproject = Expr, ifcsite = Expr, ifcbuilding = Expr | r), a] =
         forM (
             vbuildingstorey <- BasicBim.API.Root.create_entity(ifc_class = "IfcBuildingStorey", name = name);
-            ans <- local(cx -> {+ifcbuildingstorey=vbuildingstorey| cx}, body)
+            ans <- local(cx -> {+ifcbuildingstorey=vbuildingstorey| cx}, forM (
+                bldg <- asks(cx -> cx#ifcbuilding);
+                _ <- BasicBim.API.Aggregate.assign_object(products=List#{vbuildingstorey}, relating_object=bldg);
+                ans1 <- body
+            ) yield ans1)
         ) yield ans        
 
 
+    pub def assignColour(colour: NamedColour): IfcGen[cx, Expr] = 
+        forM (
+            var <- BasicBim.IfcGen.freshvarWithPrefix("colour");
+            ans <- pyAssignExpr(var, BasicBim.Colour.NamedColours.toExpr(colour))
+        ) yield ans
 }
