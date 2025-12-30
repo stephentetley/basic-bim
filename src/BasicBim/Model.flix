@@ -202,4 +202,15 @@ mod BasicBim.Model {
             attrs   <- Applicative.point(Expr.Dict(List#{("SurfaceColour", rgb), ("Transparency", otherLiteral(transparency))}));
             _       <- BasicBim.API.Style.add_surface_style(style = sty, ifc_class = "IfcSurfaceStyleShading", attributes=attrs)
         ) yield sty
+
+    // pub def wall(name: String, x: Expr): IfcGen[(model = Expr | r), Expr] = 
+    //     forM (
+    //         wall1   <- BasicBim.API.Root.create_entity(ifc_class = "IfcWall", name = name);
+    //         _       <- BasicBim.API.Spatial.assign_container(products=List#{wall1}, relating_structure= x);
+    //         wrep    <- BasicBim.API.Geometry.add_wall_representation(?context, ?length, ?height, ?direction_sense, ?offset, ?thickness, ?x_angle, ?clippings, ?booleans);
+    //         _       <- BasicBim.API.Geometry.assign_representation(product=wall1, representation=wrep);
+    //         _       <- BasicBim.API.Style.assign_representation_styles(?shape_representation, ?styles, ?replace_previous_same_type_style, ?should_use_presentation_style_assignment)
+    //     ) yield wall1
+
+
 }

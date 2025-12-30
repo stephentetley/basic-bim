@@ -33,6 +33,7 @@ mod Test01 {
                     _       <- BasicBim.API.Owner.add_application(application_developer=p1, version="0.0.1", application_full_name="basic-bim", application_identifier="basic-bim");
                     rcx     <- BasicBim.API.Context.add_context1(context_type="Model");
                     _bcx    <- BasicBim.API.Context.add_context(context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=rcx);
+                    _kiosk_sty <- BasicBim.ModelLibrary.RoadsideKiosk.roadsideKioskStyles();
                     ans     <- ifcSite("Addley West STW", forM (
                             _         <- BasicBim.Model.setSiteCommon(r -> { total_area =  Some(1492.0f64) | r});
                             _         <- BasicBim.Model.setSiteAddress(r -> { country =  "GB", postal_code = "S61 4BL" | r});
