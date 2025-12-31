@@ -30,7 +30,7 @@ mod BasicBim.API.Unit {
                     FunArg.Named("unit_type", stringLiteral(unit_type#unit_type)), 
                     FunArg.Named("prefix", stringLiteralNoneWhenEmpty(prefix#prefix))};
         forM (
-            var <- BasicBim.IfcGen.freshvarWithPrefix("siu");
+            var <- BasicBim.IfcGen.freshvarWithPrefix("unit");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.unit.add_si_unit", args)
         ) yield ans

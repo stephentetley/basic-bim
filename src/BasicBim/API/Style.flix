@@ -29,7 +29,7 @@ mod BasicBim.API.Style {
                     FunArg.Named("name", stringLiteral(name#name)), 
                     FunArg.Named("ifc_class", stringLiteral(ifc_class#ifc_class))};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("style");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.style.add_style", args)
         ) yield ans
@@ -44,7 +44,7 @@ mod BasicBim.API.Style {
                     FunArg.Named("ifc_class", stringLiteral(ifc_class#ifc_class)),
                     FunArg.Named("attributes", attributes#attributes)};
         forM (
-            var <- freshvar();
+            var <- BasicBim.IfcGen.freshvarWithPrefix("sstyle");
             args <- asks(cx -> cx#model) <$$> makeArgs;
             ans <- pyAssign(var, "ifcopenshell.api.style.add_surface_style", args)
         ) yield ans
