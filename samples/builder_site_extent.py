@@ -25,7 +25,9 @@ model3d = ifcopenshell.api.context.add_context(file=ifcfile, context_type="Model
 length = ifcopenshell.api.unit.add_si_unit(file=ifcfile, unit_type="LENGTHUNIT", prefix="MILLI")
 ifcopenshell.api.unit.assign_unit(file=ifcfile, units=[length])
 
-element = ifcopenshell.api.root.create_entity(file=ifcfile, ifc_class="IfcBuildingElementProxy", name="Site Extent")
+element = ifcopenshell.api.root.create_entity(file=ifcfile, 
+                                              ifc_class="IfcBuildingElementProxy", 
+                                              name="Site Extent")
 
 body = ifcopenshell.api.context.add_context(file=ifcfile,
                                             context_type="Model", 
@@ -36,7 +38,7 @@ body = ifcopenshell.api.context.add_context(file=ifcfile,
 builder = ifcopenshell.util.shape_builder.ShapeBuilder(ifc_file=ifcfile)
 
 
-# rectangle
+# polygon
 points = [
     V(-271.25, 698.25),
     V(1100.75, 1734.25),
@@ -67,9 +69,9 @@ polyline = builder.polyline(points, closed=True, position_offset=position)
 # extrpolyline1 = polyline
 
 
-extrpolyline1 = builder.extrude(profile_or_curve=builder.profile(polyline), 
-                            magnitude= 1.0, 
-                            position = V(0, 0, 0)) 
+extrpolyline1 = builder.extrude(profile_or_curve=polyline, 
+                                magnitude= 1.0, 
+                                position = V(0, 0, 0)) 
 
 representation = builder.get_representation(context=body, items=[extrpolyline1])
 
@@ -82,4 +84,4 @@ ifcopenshell.api.geometry.edit_object_placement(file=ifcfile,
                                                 matrix=cylinder1_placement_matrix)
 
 # Write out to a file
-ifcfile.write("./output/builder_site_extent.ifc")
+ifcfile.write("./output/builder_site_extent1.ifc")
