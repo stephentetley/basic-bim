@@ -16,18 +16,85 @@
 
 
 mod BasicBim.KioskLang.Python {
-
+    
     use Text.Pretty
     use Text.PrettyPrint
     use Text.PrettyLevel
     use Text.PrettyPrint.Doc
     use Text.PrettyPrint.{<<>>, <^>, <!>}
     use Text.PrettyPrint.{empty, int64, float64, squotes, encloseSep, text, char, comma, dot,
-        intersperse, lparen, rparen, parens, tupled, vcat, nest}
+        intersperse, lparen, rparen, parens, tupled, commaBrackets, vcat, hsep, nest}
 
+    // Python syntax based on ChocoPy
 
     pub type alias ID = String
 
+    def pID(s: ID): Doc = text(s)
+
+    pub enum Stmt with Eq, ToString {
+        case SimpleStmt(SimpleStmt)
+        case IfStmt(Expr, Block, List[(Expr, Block)], Option[Block])
+        case While(Expr, Block)
+        case ForIn(ID, Expr, Block)
+    }
+    
+    instance Pretty[Stmt] {
+        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Stmt): Doc = match x {
+            case Stmt.SimpleStmt(stmt)              => Pretty.pPrintPrec(d, p, stmt)
+            case Stmt.IfStmt(e, blk, elifs, oelse)  => {
+                let elifs1 = List.map(match((e1, blk1)) -> text("elif") <<>> Pretty.pPrintPrec(d, p, e1) ++ char(':') <<>> Pretty.pPrint(blk1), elifs);
+                let oelse1 = match oelse {
+                    case None       => Nil
+                    case Some(blk1) => List#{text("else") ++ char(':') <<>> Pretty.pPrint(blk1)}
+                };
+                text("if") <<>> Pretty.pPrintPrec(d, p, e) ++ char(':')
+                    <<>> Pretty.pPrint(blk)
+                    <!> vcat(elifs1 ::: oelse1)
+            }
+            
+            case Stmt.While(e, blk)                 => 
+                text("while") <<>> Pretty.pPrintPrec(d, p, e) <<>> char(':') <<>> Pretty.pPrint(blk)
+            
+            case Stmt.ForIn(s, e, blk)              => 
+                text("for") <<>> pID(s) <<>> text("in") 
+                    <<>> Pretty.pPrintPrec(d, p, e) <<>> char(':') <<>> Pretty.pPrint(blk)
+        }
+    }
+
+
+    pub enum SimpleStmt with Eq, ToString {
+        case Pass 
+        case ExprStmt(Expr)
+        case Return(Option[Expr])
+        case Assign(Nel[Target], Expr)
+    }
+    
+    instance Pretty[SimpleStmt] {
+        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: SimpleStmt): Doc = match x {
+            case SimpleStmt.Pass            => text("pass")
+            case SimpleStmt.ExprStmt(e)     => Pretty.pPrintPrec(d, p, e)
+            case SimpleStmt.Return(None)    => text("return")
+            case SimpleStmt.Return(Some(e)) => text("return") ++ Pretty.pPrintPrec(d, p, e)
+            case SimpleStmt.Assign(ts, e)   => {
+                let ts1 = Nel.toList(ts);
+                hsep(List.map(t -> Pretty.pPrintPrec(d, p, t) ++ char('='), ts1)) ++ Pretty.pPrintPrec(d, p, e)
+            }
+        }
+    }
+
+    pub enum Block with Eq, ToString {
+        case Block(Nel[Stmt])
+    }
+
+    // todo INDENT
+    instance Pretty[Block] {
+        pub override def pPrint(x: Block): Doc = match x {
+            case Block.Block(xs) => {
+                let xs1 = Nel.toList(xs);
+                vcat(List.map(Pretty.pPrint, xs1))
+            }
+        }
+    }
 
     pub enum Literal with Eq, ToString {
         case PyNone
@@ -80,20 +147,34 @@ mod BasicBim.KioskLang.Python {
     pub enum CExpr with Eq, ToString {
         case Ident(ID)
         case Literal(Literal)
+        case ListExpr(List[Expr])
+        case MemberExpr(MemberExpr)
+        case IndexExpr(IndexExpr)
+        case MemberCallExpr(MemberExpr, List[FunArg])
         case CallExpr(ID, List[FunArg])
         case BinExpr(CExpr, BinOp, CExpr)
+        case NegateExpr(CExpr)
     }
 
     instance Pretty[CExpr] {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: CExpr): Doc = match x {
-            case CExpr.Ident(s)             => text(s)
-            case CExpr.Literal(lit)         => Pretty.pPrint(lit)
-            case CExpr.CallExpr(name, args) =>
+            case CExpr.Ident(s)                 => pID(s)
+            case CExpr.Literal(lit)             => Pretty.pPrint(lit)
+            case CExpr.ListExpr(es)             =>
+                commaBrackets(List.map(e1 -> Pretty.pPrintPrec(d, p, e1), es))
+
+            case CExpr.MemberExpr(e)            => Pretty.pPrintPrec(d, p, e)
+            case CExpr.IndexExpr(e)             => Pretty.pPrintPrec(d, p, e)
+            case CExpr.MemberCallExpr(e, args)  =>
+                Pretty.pPrintPrec(d, p, e) ++ tupled(List.map(e1 -> Pretty.pPrintPrec(d, p, e1), args)) 
+
+            case CExpr.CallExpr(name, args)     =>
                 text(name) ++ tupled(List.map(e -> Pretty.pPrintPrec(d, p, e), args)) 
 
-            case CExpr.BinExpr(e1, op, e2)  =>
+            case CExpr.BinExpr(e1, op, e2)      =>
                 Pretty.pPrintPrec(d, p, e1) ++ Pretty.pPrint(op) ++ Pretty.pPrintPrec(d, p, e2)
 
+            case CExpr.NegateExpr(e)            => char('-') ++ Pretty.pPrintPrec(d, p, e)
         }
     }
 
@@ -150,6 +231,33 @@ mod BasicBim.KioskLang.Python {
         pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: MemberExpr): Doc = match x {
             case MemberExpr.Member(e, ident)    => 
                 Pretty.pPrintPrec(d, p, e) <<>> char('.') <<>> text(ident)
+        }
+    }
+
+
+    pub enum IndexExpr with Eq, ToString {
+        case Index(CExpr, Expr)
+    }
+
+    instance Pretty[IndexExpr] {
+        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: IndexExpr): Doc = match x {
+            case IndexExpr.Index(e1, e2)    => 
+                Pretty.pPrintPrec(d, p, e1) 
+                    <<>> char('[') <<>> Pretty.pPrintPrec(d, p, e2) <<>> char(']')
+        }
+    }
+
+    pub enum Target with Eq, ToString {
+        case TargetID(ID)
+        case TargetMember(MemberExpr)
+        case TargetIndex(IndexExpr)
+    }
+
+    instance Pretty[Target] {
+        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Target): Doc = match x {
+            case Target.TargetID(s)     => pID(s)
+            case Target.TargetMember(e) => Pretty.pPrintPrec(d, p, e)
+            case Target.TargetIndex(e)  => Pretty.pPrintPrec(d, p, e)
         }
     }
 
