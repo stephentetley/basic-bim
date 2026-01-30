@@ -23,13 +23,55 @@ mod BasicBim.KioskLang.Python {
     use Text.PrettyPrint.Doc
     use Text.PrettyPrint.{<<>>, <^>, <!>}
     use Text.PrettyPrint.{empty, int64, float64, squotes, encloseSep, text, char, comma, dot,
-        intersperse, lparen, rparen, parens, tupled, commaBrackets, vcat, hsep, nest}
+        intersperse, lparen, rparen, parens, brackets, tupled, commaBrackets, vcat, hsep, nest}
 
     // Python syntax based on ChocoPy
 
     pub type alias ID = String
 
     def pID(s: ID): Doc = text(s)
+
+    pub enum IDSTRING with Eq,ToString {
+        case IDSTRING(String)
+    }
+    
+    instance Pretty[IDSTRING] {
+        pub override def pPrint(x: IDSTRING): Doc = match x {
+            case IDSTRING.IDSTRING(s) => text(s)
+        }
+    }
+
+    pub enum TypedVar with Eq, ToString {
+        case TypedVar(ID, Type)
+    }
+    
+    instance Pretty[TypedVar] {
+        pub override def pPrint(x: TypedVar): Doc = match x {
+            case TypedVar.TypedVar(s, ty) => pID(s) <<>> char(':') <<>> Pretty.pPrint(ty)
+        }
+    }
+
+    pub enum Type with Eq, ToString {
+        case ClassType(IDSTRING)
+        case ListType(Type)
+    }
+    
+    instance Pretty[Type] {
+        pub override def pPrint(x: Type): Doc = match x {
+            case Type.ClassType(s) => Pretty.pPrint(s)
+            case Type.ListType(t)  => brackets(Pretty.pPrint(t))
+        }
+    }
+
+    pub enum VarDef with Eq, ToString {
+        case VarDef(TypedVar, Literal)
+    }
+
+    instance Pretty[VarDef] {
+        pub override def pPrint(x: VarDef): Doc = match x {
+            case VarDef.VarDef(v, lit) => Pretty.pPrint(v) <<>> char('=') <<>> Pretty.pPrint(lit)
+        }
+    }
 
     pub enum Stmt with Eq, ToString {
         case SimpleStmt(SimpleStmt)
