@@ -41,6 +41,123 @@ mod BasicBim.KioskLang.Python {
         }
     }
 
+
+    pub enum Program with Eq, ToString {
+        case Program(List[ProgramDef], List[Stmt])
+    }
+
+    instance Pretty[Program] {
+        pub override def pPrint(x: Program): Doc = match x {
+            case Program.Program(defs, stmts) => 
+                vcat(List.map(Pretty.pPrint, defs)) <!> vcat(List.map(Pretty.pPrint, stmts))
+        }
+    }
+
+    pub enum ProgramDef with Eq, ToString {
+        case ProgramVarDef(VarDef)
+        case ProgramFuncDef(FuncDef)
+        case ProgramClassDef(ClassDef)
+    }
+
+    instance Pretty[ProgramDef] {
+        pub override def pPrint(x: ProgramDef): Doc = match x {
+            case ProgramDef.ProgramVarDef(vdef)     => Pretty.pPrint(vdef)
+            case ProgramDef.ProgramFuncDef(fdef)    => Pretty.pPrint(fdef)
+            case ProgramDef.ProgramClassDef(cdef)   => Pretty.pPrint(cdef)
+        }
+    }
+
+    pub enum ClassDef with Eq, ToString {
+        case ClassDef(ID, ID, ClassBody)
+    }
+
+    instance Pretty[ClassDef] {
+        pub override def pPrint(x: ClassDef): Doc = match x {
+            case ClassDef.ClassDef(ident, superid, body) => {
+                text("def") <<>> pID(ident) ++ parens(pID(superid)) ++ char(':')
+                    <!> Pretty.pPrint(body)
+            }
+        }
+    }
+
+
+    pub enum ClassBody with Eq, ToString {
+        case Pass
+        case BodyDefs(Nel[ClassBodyDef])
+    }
+
+    instance Pretty[ClassBody] {
+        pub override def pPrint(x: ClassBody): Doc = match x {
+            case ClassBody.Pass             => text("pass")
+            case ClassBody.BodyDefs(defs)   => {
+                let defs1 = Nel.toList(defs);
+                vcat(List.map(Pretty.pPrint, defs1))
+            }
+        }
+    }
+
+
+    pub enum ClassBodyDef with Eq, ToString {
+        case ClassVarDef(VarDef)
+        case ClassFuncDef(FuncDef)
+    }
+
+    instance Pretty[ClassBodyDef] {
+        pub override def pPrint(x: ClassBodyDef): Doc = match x {
+            case ClassBodyDef.ClassVarDef(vdef)     => Pretty.pPrint(vdef)
+            case ClassBodyDef.ClassFuncDef(fdef)    => Pretty.pPrint(fdef)
+        }
+    }
+
+    pub enum FuncDef with Eq, ToString {
+        case FuncDef(ID, List[TypedVar], Option[Type], FuncBody)
+    }
+
+    instance Pretty[FuncDef] {
+        pub override def pPrint(x: FuncDef): Doc = match x {
+            case FuncDef.FuncDef(ident, args, otype, body) => {
+                let returntype = match otype {
+                    case None       => empty()
+                    case Some(ty)   => text(" ->") <<>> Pretty.pPrint(ty)
+                };
+                text("def") <<>> pID(ident) 
+                    ++ tupled(List.map(Pretty.pPrint, args)) ++ returntype
+                    ++ char(':')
+                    <!> Pretty.pPrint(body)
+            }
+        }
+    }
+
+    pub enum FuncBody with Eq, ToString {
+        case FuncBody(List[FuncBodyDecl], Nel[Stmt])
+    }
+
+    instance Pretty[FuncBody] {
+        pub override def pPrint(x: FuncBody): Doc = match x {
+            case FuncBody.FuncBody(decls, stmts) => {
+                let stmts1 = Nel.toList(stmts);
+                vcat(List.map(Pretty.pPrint, decls)) <!> vcat(List.map(Pretty.pPrint, stmts1)) 
+            }
+        }
+    }
+
+
+    pub enum FuncBodyDecl with Eq, ToString {
+        case FuncGlobalDecl(GlobalDecl)
+        case FuncNonLocalDecl(NonLocalDecl)
+        case FuncVarDef(VarDef)
+        case FuncFuncDef(FuncDef)
+    }
+
+    instance Pretty[FuncBodyDecl] {
+        pub override def pPrint(x: FuncBodyDecl): Doc = match x {
+            case FuncBodyDecl.FuncGlobalDecl(decl)      => Pretty.pPrint(decl)
+            case FuncBodyDecl.FuncNonLocalDecl(decl)    => Pretty.pPrint(decl)
+            case FuncBodyDecl.FuncVarDef(vdef)          => Pretty.pPrint(vdef)
+            case FuncBodyDecl.FuncFuncDef(fdef)         => Pretty.pPrint(fdef)
+        }
+    }
+
     pub enum TypedVar with Eq, ToString {
         case TypedVar(ID, Type)
     }
@@ -60,6 +177,27 @@ mod BasicBim.KioskLang.Python {
         pub override def pPrint(x: Type): Doc = match x {
             case Type.ClassType(s) => Pretty.pPrint(s)
             case Type.ListType(t)  => brackets(Pretty.pPrint(t))
+        }
+    }
+
+
+    pub enum GlobalDecl with Eq, ToString {
+        case Global(ID)
+    }
+
+    instance Pretty[GlobalDecl] {
+        pub override def pPrint(x: GlobalDecl): Doc = match x {
+            case GlobalDecl.Global(ident) => text("nonlocal") <<>> pID(ident)
+        }
+    }
+
+    pub enum NonLocalDecl with Eq, ToString {
+        case NonLocal(ID)
+    }
+
+    instance Pretty[NonLocalDecl] {
+        pub override def pPrint(x: NonLocalDecl): Doc = match x {
+            case NonLocalDecl.NonLocal(ident) => text("nonlocal") <<>> pID(ident)
         }
     }
 
