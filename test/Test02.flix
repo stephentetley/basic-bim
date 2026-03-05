@@ -19,17 +19,17 @@ mod Test02 {
     use BasicBim.KioskLang.Syntax.{V2, V3, Shape}
     use BasicBim.KioskLang.Python.{Expr, CExpr}
     
-    @test
+    @Test
     def test01(): Unit \ IO = 
         let wall1 = Shape.Wall({length_m = 2.0f64, height_m = 1.6f64, thickness_m=0.05f64});
         println(wall1);
         ()
 
-    @test
+    @Test
     def test02(): Unit \ IO = 
         let py = CExpr.CallExpr("ifcopenshell.api.geometry.add_wall_representation", 
                                 List#{});
-        let doc = Text.Pretty.pPrint(py);
+        let doc = FlixPretty.PrettyClass.Pretty.pPrint(py);
         println(ToString.toString(doc));
         ()
 

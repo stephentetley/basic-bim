@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.KioskLang.Syntax {
+pub mod BasicBim.KioskLang.Syntax {
 
     pub enum Shape  {
         case Wall({length_m = Float64, height_m = Float64, thickness_m = Float64})

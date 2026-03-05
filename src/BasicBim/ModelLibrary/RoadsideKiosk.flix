@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.ModelLibrary.RoadsideKiosk {
+pub mod BasicBim.ModelLibrary.RoadsideKiosk {
 
     use BasicBim.IfcGen
     use BasicBim.Base.Syntax.{Expr}

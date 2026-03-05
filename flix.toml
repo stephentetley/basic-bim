@@ -2,11 +2,12 @@
 name        = "basic-bim"
 description = "Experiments generating IFC BIM models"
 version     = "0.1.0"
-flix        = "0.67.2"
+flix        = "0.68.0"
 license     = "Apache-2.0"
 authors     = ["Stephen Tetley <stephen.tetley@gmail.com>"]
 
 [dependencies]
-"github:stephentetley/flix-pretty" = { version = "0.9.3", security = "unrestricted" }
+"github:stephentetley/flix-choice" = { version = "0.1.0", security = "unrestricted" }
+"github:stephentetley/flix-pretty" = { version = "0.10.0", security = "unrestricted" }
 
 

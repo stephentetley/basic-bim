@@ -15,22 +15,22 @@
  */
 
 
-mod BasicBim.Base.Syntax {
+pub mod BasicBim.Base.Syntax {
 
-    use Text.Pretty
-    use Text.PrettyPrint
-    use Text.PrettyLevel
-    use Text.PrettyPrint.Doc
-    use Text.PrettyPrint.{<<>>, <&> }
-    use Text.PrettyPrint.{empty, int32, squotes, encloseSep, text, char, comma, dot,
+
+    use FlixPretty.Doc
+    use FlixPretty.PrettyClass.Pretty
+    use FlixPretty.PrettyClass.PrettyLevel
+    use FlixPretty.{<<>>, <&> }
+    use FlixPretty.{empty, int32, squotes, encloseSep, text, char, comma, dot,
         intersperse, lparen, rparen, parens, tupled, commaBrackets, commaBraces, vcat, nest}
 
     pub type alias Code = Chain[Stmt]
 
     pub def ppCode(x: Code): String = 
         def step(d: Stmt): String = {
-            let txt = Pretty.pPrint(d);
-            Text.PrettyPrint.render(80, txt)
+            let txt = FlixPretty.PrettyClass.Pretty.pPrint(d);
+            FlixPretty.render(80, txt)
         };
         region rc {
             let sb = StringBuilder.empty(rc);
@@ -48,7 +48,7 @@ mod BasicBim.Base.Syntax {
     
     instance Pretty[Stmt] {
         pub override def pPrint(x: Stmt): Doc = 
-            let stdlevel = Text.prettyNormal();
+            let stdlevel = FlixPretty.PrettyClass.prettyNormal();
             match x {
                 case Stmt.Import(s)         => text("import") <<>> text(s)
                 case Stmt.Assign(e1, e2)    => 
@@ -56,7 +56,7 @@ mod BasicBim.Base.Syntax {
 
                 case Stmt.ExprStmt(e)       => Pretty.pPrintPrec(stdlevel, 10, e)
                 case Stmt.Verbatim(lines)   => 
-                    Text.PrettyPrint.foldDocs((d1, d2) -> d1 <&> d2, List.map(text, lines))
+                    FlixPretty.foldDocs((d1, d2) -> d1 <&> d2, List.map(text, lines))
             }
     }
 

@@ -21,7 +21,7 @@ mod Test01 {
     use BasicBim.Model.{model, ifcProject, ifcSite, ifcBuilding, ifcBuildingStorey}
     use BasicBim.ModelLibrary.RoadsideKiosk
 
-    @test
+    @Test
     def test01(): Unit \ IO = 
         let (py, _) = BasicBim.Model.writePy("./test/output/basic_bim01.py",{}, 
             model("IFC4X3", "./output/basic_bim01.ifc", 

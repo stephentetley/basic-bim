@@ -15,15 +15,20 @@
  */
 
 
-mod BasicBim.KioskLang.Python {
-    
-    use Text.Pretty
-    use Text.PrettyPrint
-    use Text.PrettyLevel
-    use Text.PrettyPrint.Doc
-    use Text.PrettyPrint.{<<>>, <^>, <!>}
-    use Text.PrettyPrint.{empty, int64, float64, squotes, encloseSep, text, char, comma, dot,
+pub mod BasicBim.KioskLang.Python {
+
+
+    use Choice2.Choice2;
+    use Choice3.Choice3;
+    use Choice4.Choice4;
+
+    use FlixPretty.PrettyClass.Pretty
+    use FlixPretty.PrettyClass.PrettyLevel
+    use FlixPretty.Doc
+    use FlixPretty.{<<>>, <^>, <!>}
+    use FlixPretty.{empty, int64, float64, squotes, encloseSep, text, char, comma, dot,
         intersperse, lparen, rparen, parens, brackets, tupled, commaBrackets, vcat, hsep, nest}
+
 
     // Python syntax based on ChocoPy
 
@@ -49,23 +54,21 @@ mod BasicBim.KioskLang.Python {
     instance Pretty[Program] {
         pub override def pPrint(x: Program): Doc = match x {
             case Program.Program(defs, stmts) => 
-                vcat(List.map(Pretty.pPrint, defs)) <!> vcat(List.map(Pretty.pPrint, stmts))
+                vcat(List.map(pProgramDef, defs)) <!> vcat(List.map(Pretty.pPrint, stmts))
         }
     }
 
-    pub enum ProgramDef with Eq, ToString {
-        case ProgramVarDef(VarDef)
-        case ProgramFuncDef(FuncDef)
-        case ProgramClassDef(ClassDef)
-    }
+    pub type alias ProgramDef = Choice3[VarDef, FuncDef, ClassDef]
 
-    instance Pretty[ProgramDef] {
-        pub override def pPrint(x: ProgramDef): Doc = match x {
-            case ProgramDef.ProgramVarDef(vdef)     => Pretty.pPrint(vdef)
-            case ProgramDef.ProgramFuncDef(fdef)    => Pretty.pPrint(fdef)
-            case ProgramDef.ProgramClassDef(cdef)   => Pretty.pPrint(cdef)
-        }
+
+    def pProgramDef(x: ProgramDef): Doc = match x {
+        case Choice3.A(a) => Pretty.pPrint(a)
+        case Choice3.B(b) => Pretty.pPrint(b)
+        case Choice3.C(c) => Pretty.pPrint(c)
     }
+        // Choice3.reduce(Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, x)
+    
+
 
     pub enum ClassDef with Eq, ToString {
         case ClassDef(ID, ID, ClassBody)
@@ -91,23 +94,22 @@ mod BasicBim.KioskLang.Python {
             case ClassBody.Pass             => text("pass")
             case ClassBody.BodyDefs(defs)   => {
                 let defs1 = Nel.toList(defs);
-                vcat(List.map(Pretty.pPrint, defs1))
+                vcat(List.map(pClassBodyDef, defs1))
             }
         }
     }
 
 
-    pub enum ClassBodyDef with Eq, ToString {
-        case ClassVarDef(VarDef)
-        case ClassFuncDef(FuncDef)
-    }
 
-    instance Pretty[ClassBodyDef] {
-        pub override def pPrint(x: ClassBodyDef): Doc = match x {
-            case ClassBodyDef.ClassVarDef(vdef)     => Pretty.pPrint(vdef)
-            case ClassBodyDef.ClassFuncDef(fdef)    => Pretty.pPrint(fdef)
-        }
+    pub type alias ClassBodyDef = Choice2[VarDef, FuncDef]
+
+
+    def pClassBodyDef(x: ClassBodyDef): Doc = match x {
+        case Choice2.A(a) => Pretty.pPrint(a)
+        case Choice2.B(b) => Pretty.pPrint(b)
     }
+        // Choice2.reduce(Pretty.pPrint, Pretty.pPrint, x)
+
 
     pub enum FuncDef with Eq, ToString {
         case FuncDef(ID, List[TypedVar], Option[Type], FuncBody)
@@ -136,27 +138,21 @@ mod BasicBim.KioskLang.Python {
         pub override def pPrint(x: FuncBody): Doc = match x {
             case FuncBody.FuncBody(decls, stmts) => {
                 let stmts1 = Nel.toList(stmts);
-                vcat(List.map(Pretty.pPrint, decls)) <!> vcat(List.map(Pretty.pPrint, stmts1)) 
+                vcat(List.map(pFuncBodyDecl, decls)) <!> vcat(List.map(Pretty.pPrint, stmts1)) 
             }
         }
     }
 
+    pub type alias FuncBodyDecl = Choice4[GlobalDecl, NonLocalDecl, VarDef, FuncDef]
 
-    pub enum FuncBodyDecl with Eq, ToString {
-        case FuncGlobalDecl(GlobalDecl)
-        case FuncNonLocalDecl(NonLocalDecl)
-        case FuncVarDef(VarDef)
-        case FuncFuncDef(FuncDef)
+    def pFuncBodyDecl(x: FuncBodyDecl): Doc = match x {
+        case Choice4.A(a) => Pretty.pPrint(a)
+        case Choice4.B(b) => Pretty.pPrint(b)
+        case Choice4.C(c) => Pretty.pPrint(c)
+        case Choice4.D(d) => Pretty.pPrint(d)
     }
+        // Choice4.reduce(Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, x)
 
-    instance Pretty[FuncBodyDecl] {
-        pub override def pPrint(x: FuncBodyDecl): Doc = match x {
-            case FuncBodyDecl.FuncGlobalDecl(decl)      => Pretty.pPrint(decl)
-            case FuncBodyDecl.FuncNonLocalDecl(decl)    => Pretty.pPrint(decl)
-            case FuncBodyDecl.FuncVarDef(vdef)          => Pretty.pPrint(vdef)
-            case FuncBodyDecl.FuncFuncDef(fdef)         => Pretty.pPrint(fdef)
-        }
-    }
 
     pub enum TypedVar with Eq, ToString {
         case TypedVar(ID, Type)
