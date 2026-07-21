@@ -25,7 +25,7 @@ pub mod BasicBim.ModelLibrary.RoadsideKiosk {
     // define this once at model/project level
     pub def roadsideKioskStyles(): IfcGen[(model = Expr | r), {shading_style = Expr}] = 
         forM (
-            sstyle <- Model.ifcSurfaceStyleShading("RoadsideKiosk Shading Style", BasicBim.Colour.NamedColours.darkseagreen(), 0.1f64)
+            sstyle <- Model.ifcSurfaceStyleShading("RoadsideKiosk Shading Style", BasicBim.Colour.SVGColours.darkseagreen(), 0.1f64)
         ) yield {shading_style = sstyle}
 
 

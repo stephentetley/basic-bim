@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Pset.WallCommon {
+pub mod BasicBim.Pset.WallCommon {
 
     use BasicBim.Base.Syntax.{Expr, stringLiteralNoneWhenEmpty, otherLiteralOrNone}
     use BasicBim.Pset.Base

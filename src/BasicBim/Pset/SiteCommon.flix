@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Pset.SiteCommon {
+pub mod BasicBim.Pset.SiteCommon {
 
     use BasicBim.Base.Syntax.{Expr, stringLiteralNoneWhenEmpty, otherLiteralOrNone}
     use BasicBim.Pset.Base

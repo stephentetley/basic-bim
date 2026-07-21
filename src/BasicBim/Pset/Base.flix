@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Pset.Base {
+pub mod BasicBim.Pset.Base {
 
     use BasicBim.Base.Syntax.{Expr}
 

@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Util.Element {
+pub mod BasicBim.Util.Element {
 
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral}

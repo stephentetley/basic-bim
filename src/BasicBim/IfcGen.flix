@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-mod BasicBim {
 
-    use BasicBim.Base.Syntax.Code
+pub mod BasicBim.IfcGen {
 
-    // Use state of Map[String, Int32] to allow more meaningful variable names
+    use BasicBim.Base.Syntax.{Code, Stmt, Expr, FunArg}
+
 
     pub enum IfcGen[r: RecordRow, a: Type](({| r}, Code, Map[String, Int32]) -> (Code, Map[String, Int32], a))
 
@@ -39,11 +39,7 @@ mod BasicBim {
           pub def flatMap(f: a -> IfcGen[cx, b] \ ef, x: IfcGen[cx, a]): IfcGen[cx, b] \ ef = 
             BasicBim.IfcGen.flatMap(f, x)
     }
-}
 
-mod BasicBim.IfcGen {
-
-    use BasicBim.Base.Syntax.{Code, Stmt, Expr, FunArg}
 
     pub def runIfcGen(ctx: {| r}, st: Map[String, Int32], f: IfcGen[r, a]): (Code, Map[String, Int32], a) = 
         let IfcGen(f1) = f;

@@ -16,13 +16,15 @@
 
 mod Test01 {
 
+    use Fs.FileWrite
+
     use Applicative.{point}
     use BasicBim.IfcGen
     use BasicBim.Model.{model, ifcProject, ifcSite, ifcBuilding, ifcBuildingStorey}
     use BasicBim.ModelLibrary.RoadsideKiosk
 
     @Test
-    def test01(): Unit \ IO = 
+    def test01(): Unit \ IO + FileWrite  = 
         let (py, _) = BasicBim.Model.writePy("./test/output/basic_bim01.py",{}, 
             model("IFC4X3", "./output/basic_bim01.ifc", 
                 ifcProject("Addley West Project", forM(

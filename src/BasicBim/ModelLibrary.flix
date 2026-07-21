@@ -1,3 +1,3 @@
 
 
-mod BasicBim.ModelLibrary { }
+pub mod BasicBim.ModelLibrary { }

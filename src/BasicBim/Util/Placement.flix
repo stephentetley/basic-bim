@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Util.Placement {
+pub mod BasicBim.Util.Placement {
 
     use Functor.{<$$>}
     use BasicBim.Base.Syntax.{Expr, FunArg, stringLiteral, otherLiteral}

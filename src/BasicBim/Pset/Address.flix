@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Pset.Address {
+pub mod BasicBim.Pset.Address {
 
     use BasicBim.Base.Syntax.{Expr, stringLiteralNoneWhenEmpty, otherLiteralOrNone}
     use BasicBim.Pset.Base

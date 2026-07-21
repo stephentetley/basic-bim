@@ -47,7 +47,7 @@ pub mod BasicBim.Base.Syntax {
     }
     
     instance Pretty[Stmt] {
-        pub override def pPrint(x: Stmt): Doc = 
+        pub redef pPrint(x: Stmt): Doc = 
             let stdlevel = FlixPretty.PrettyClass.prettyNormal();
             match x {
                 case Stmt.Import(s)         => text("import") <<>> text(s)
@@ -109,7 +109,7 @@ pub mod BasicBim.Base.Syntax {
     }
 
     instance Pretty[Expr] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
             case Expr.Lit(v)            => text(v)
             case Expr.Var(s)            => text(s)
             case Expr.Apply(funE, args) => 
@@ -130,7 +130,7 @@ pub mod BasicBim.Base.Syntax {
     }
 
     instance Pretty[FunArg] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: FunArg): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: FunArg): Doc = match x {
             case FunArg.Unnamed(e)  => Pretty.pPrintPrec(d, p, e)
             case FunArg.Named(n, e) => text(n) ++ char('=') ++ Pretty.pPrintPrec(d, p, e)
         }

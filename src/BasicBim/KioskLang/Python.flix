@@ -41,7 +41,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[IDSTRING] {
-        pub override def pPrint(x: IDSTRING): Doc = match x {
+        pub redef pPrint(x: IDSTRING): Doc = match x {
             case IDSTRING.IDSTRING(s) => text(s)
         }
     }
@@ -52,7 +52,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[Program] {
-        pub override def pPrint(x: Program): Doc = match x {
+        pub redef pPrint(x: Program): Doc = match x {
             case Program.Program(defs, stmts) => 
                 vcat(List.map(pProgramDef, defs)) <!> vcat(List.map(Pretty.pPrint, stmts))
         }
@@ -66,8 +66,6 @@ pub mod BasicBim.KioskLang.Python {
         case Choice3.B(b) => Pretty.pPrint(b)
         case Choice3.C(c) => Pretty.pPrint(c)
     }
-        // Choice3.reduce(Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, x)
-    
 
 
     pub enum ClassDef with Eq, ToString {
@@ -75,7 +73,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[ClassDef] {
-        pub override def pPrint(x: ClassDef): Doc = match x {
+        pub redef pPrint(x: ClassDef): Doc = match x {
             case ClassDef.ClassDef(ident, superid, body) => {
                 text("def") <<>> pID(ident) ++ parens(pID(superid)) ++ char(':')
                     <!> Pretty.pPrint(body)
@@ -90,7 +88,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[ClassBody] {
-        pub override def pPrint(x: ClassBody): Doc = match x {
+        pub redef pPrint(x: ClassBody): Doc = match x {
             case ClassBody.Pass             => text("pass")
             case ClassBody.BodyDefs(defs)   => {
                 let defs1 = Nel.toList(defs);
@@ -108,7 +106,6 @@ pub mod BasicBim.KioskLang.Python {
         case Choice2.A(a) => Pretty.pPrint(a)
         case Choice2.B(b) => Pretty.pPrint(b)
     }
-        // Choice2.reduce(Pretty.pPrint, Pretty.pPrint, x)
 
 
     pub enum FuncDef with Eq, ToString {
@@ -116,7 +113,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[FuncDef] {
-        pub override def pPrint(x: FuncDef): Doc = match x {
+        pub redef pPrint(x: FuncDef): Doc = match x {
             case FuncDef.FuncDef(ident, args, otype, body) => {
                 let returntype = match otype {
                     case None       => empty()
@@ -135,7 +132,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[FuncBody] {
-        pub override def pPrint(x: FuncBody): Doc = match x {
+        pub redef pPrint(x: FuncBody): Doc = match x {
             case FuncBody.FuncBody(decls, stmts) => {
                 let stmts1 = Nel.toList(stmts);
                 vcat(List.map(pFuncBodyDecl, decls)) <!> vcat(List.map(Pretty.pPrint, stmts1)) 
@@ -151,7 +148,6 @@ pub mod BasicBim.KioskLang.Python {
         case Choice4.C(c) => Pretty.pPrint(c)
         case Choice4.D(d) => Pretty.pPrint(d)
     }
-        // Choice4.reduce(Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, Pretty.pPrint, x)
 
 
     pub enum TypedVar with Eq, ToString {
@@ -159,7 +155,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[TypedVar] {
-        pub override def pPrint(x: TypedVar): Doc = match x {
+        pub redef pPrint(x: TypedVar): Doc = match x {
             case TypedVar.TypedVar(s, ty) => pID(s) <<>> char(':') <<>> Pretty.pPrint(ty)
         }
     }
@@ -170,7 +166,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[Type] {
-        pub override def pPrint(x: Type): Doc = match x {
+        pub redef pPrint(x: Type): Doc = match x {
             case Type.ClassType(s) => Pretty.pPrint(s)
             case Type.ListType(t)  => brackets(Pretty.pPrint(t))
         }
@@ -182,7 +178,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[GlobalDecl] {
-        pub override def pPrint(x: GlobalDecl): Doc = match x {
+        pub redef pPrint(x: GlobalDecl): Doc = match x {
             case GlobalDecl.Global(ident) => text("nonlocal") <<>> pID(ident)
         }
     }
@@ -192,7 +188,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[NonLocalDecl] {
-        pub override def pPrint(x: NonLocalDecl): Doc = match x {
+        pub redef pPrint(x: NonLocalDecl): Doc = match x {
             case NonLocalDecl.NonLocal(ident) => text("nonlocal") <<>> pID(ident)
         }
     }
@@ -202,7 +198,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[VarDef] {
-        pub override def pPrint(x: VarDef): Doc = match x {
+        pub redef pPrint(x: VarDef): Doc = match x {
             case VarDef.VarDef(v, lit) => Pretty.pPrint(v) <<>> char('=') <<>> Pretty.pPrint(lit)
         }
     }
@@ -215,7 +211,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[Stmt] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Stmt): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: Stmt): Doc = match x {
             case Stmt.SimpleStmt(stmt)              => Pretty.pPrintPrec(d, p, stmt)
             case Stmt.IfStmt(e, blk, elifs, oelse)  => {
                 let elifs1 = List.map(match((e1, blk1)) -> text("elif") <<>> Pretty.pPrintPrec(d, p, e1) ++ char(':') <<>> Pretty.pPrint(blk1), elifs);
@@ -246,7 +242,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[SimpleStmt] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: SimpleStmt): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: SimpleStmt): Doc = match x {
             case SimpleStmt.Pass            => text("pass")
             case SimpleStmt.ExprStmt(e)     => Pretty.pPrintPrec(d, p, e)
             case SimpleStmt.Return(None)    => text("return")
@@ -264,7 +260,7 @@ pub mod BasicBim.KioskLang.Python {
 
     // todo INDENT
     instance Pretty[Block] {
-        pub override def pPrint(x: Block): Doc = match x {
+        pub redef pPrint(x: Block): Doc = match x {
             case Block.Block(xs) => {
                 let xs1 = Nel.toList(xs);
                 vcat(List.map(Pretty.pPrint, xs1))
@@ -282,7 +278,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[Literal] {
-        pub override def pPrint(x: Literal): Doc = match x {
+        pub redef pPrint(x: Literal): Doc = match x {
             case Literal.PyNone         => text("None")
             case Literal.PyTrue         => text("True")
             case Literal.PyFalse        => text("False")
@@ -303,7 +299,7 @@ pub mod BasicBim.KioskLang.Python {
 
 
     instance Pretty[Expr] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: Expr): Doc = match x {
             case Expr.CExpr(e)                  => Pretty.pPrintPrec(d, p, e)
             case Expr.NotExpr(e)                => text("not") ++ Pretty.pPrintPrec(d, p, e)
             case Expr.AndExpr(e1, e2)           => 
@@ -333,7 +329,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[CExpr] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: CExpr): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: CExpr): Doc = match x {
             case CExpr.Ident(s)                 => pID(s)
             case CExpr.Literal(lit)             => Pretty.pPrint(lit)
             case CExpr.ListExpr(es)             =>
@@ -360,7 +356,7 @@ pub mod BasicBim.KioskLang.Python {
     }
     
     instance Pretty[FunArg] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: FunArg): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: FunArg): Doc = match x {
             case FunArg.Unnamed(e)      => Pretty.pPrintPrec(d, p, e)
             case FunArg.Named(name, e)  =>
                 text(name) ++ char('=') ++ Pretty.pPrintPrec(d, p, e)
@@ -383,7 +379,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[BinOp] {
-        pub override def pPrint(x: BinOp): Doc = match x {
+        pub redef pPrint(x: BinOp): Doc = match x {
             case BinOp.Plus             => char('+')
             case BinOp.Minus            => char('-')
             case BinOp.Mult             => char('*')
@@ -404,7 +400,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[MemberExpr] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: MemberExpr): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: MemberExpr): Doc = match x {
             case MemberExpr.Member(e, ident)    => 
                 Pretty.pPrintPrec(d, p, e) <<>> char('.') <<>> text(ident)
         }
@@ -416,7 +412,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[IndexExpr] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: IndexExpr): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: IndexExpr): Doc = match x {
             case IndexExpr.Index(e1, e2)    => 
                 Pretty.pPrintPrec(d, p, e1) 
                     <<>> char('[') <<>> Pretty.pPrintPrec(d, p, e2) <<>> char(']')
@@ -430,7 +426,7 @@ pub mod BasicBim.KioskLang.Python {
     }
 
     instance Pretty[Target] {
-        pub override def pPrintPrec(d: PrettyLevel, p: Int32, x: Target): Doc = match x {
+        pub redef pPrintPrec(d: PrettyLevel, p: Int32, x: Target): Doc = match x {
             case Target.TargetID(s)     => pID(s)
             case Target.TargetMember(e) => Pretty.pPrintPrec(d, p, e)
             case Target.TargetIndex(e)  => Pretty.pPrintPrec(d, p, e)

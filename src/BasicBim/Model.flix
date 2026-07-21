@@ -18,13 +18,15 @@
 
 
 
-mod BasicBim.Model {
+pub mod BasicBim.Model {
+    
+    use Fs.FileWrite
 
     use Applicative.{<*, *>}
     use BasicBim.Base.Syntax.{Stmt, Expr, otherLiteral}
     use BasicBim.IfcGen
     use BasicBim.IfcGen.{runIfcGen, local, asks, pyImport, verbatim, pyAssignExpr}
-    use BasicBim.Colour.NamedColours.{NamedColour}
+    use BasicBim.Colour.SVGColours.{NamedColour}
     use BasicBim.Pset.Address
     use BasicBim.Pset.SiteCommon
 
@@ -53,15 +55,12 @@ mod BasicBim.Model {
     //     }
     // }
 
-    pub def writePy(path: String, mctx: {| cx}, m: IfcGen[cx, a]): (String, a) \ IO = 
+    pub def writePy(path: String, mctx: {| cx}, m: IfcGen[cx, a]): (String, a) \ IO + FileWrite = 
         let (pycode, a) = showPy(mctx, m);
-        run {
-            match FileWriteWithResult.write(str = pycode, path){
-                case Result.Ok(_)    => ()
-                case Result.Err(err) =>
-                    println("Unable to write file. Error: ${err}")
-            }
-        } with FileWriteWithResult.runWithIO;
+        match Fs.FileWrite.write(str = pycode, path) {
+            case Result.Ok(_)    => ()
+            case Result.Err(err) => println("Unable to write file. Error: ${err}")
+        };
         (pycode, a)
 
 
@@ -192,7 +191,7 @@ mod BasicBim.Model {
     def getColour(colour: NamedColour): IfcGen[cx, Expr] = 
         forM (
             var <- BasicBim.IfcGen.freshvarWithPrefix("colour");
-            ans <- pyAssignExpr(var, BasicBim.Colour.NamedColours.toExpr(colour))
+            ans <- pyAssignExpr(var, BasicBim.Colour.SVGColours.toExpr(colour))
         ) yield ans
 
     pub def ifcSurfaceStyleShading[r: RecordRow](style_name: String, surface_colour: NamedColour, transparency: Float64): IfcGen[(model = Expr | r), Expr] = 

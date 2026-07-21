@@ -15,7 +15,7 @@
  */
 
 
-mod BasicBim.Colour.NamedColours {
+pub mod BasicBim.Colour.SVGColours {
 
     use BasicBim.Base.Syntax.{Expr, stringLiteral, otherLiteral}
 
