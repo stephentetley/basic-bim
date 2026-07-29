@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{verbatim}
+
+\tikzset{
+  building1/.pic={
+    \draw[draw=black,fill=orange!30,thick] (-2cm,-2) to (2,-2) to (2,0) to (0,0) to (0,2) to (-2, 2) to cycle;
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}
+
+\draw [help lines] grid (14,16);
+
+\draw (3,3) pic {building1};
+\draw (8,3) pic {building1};
+
+\end{tikzpicture}
+\end{document}
