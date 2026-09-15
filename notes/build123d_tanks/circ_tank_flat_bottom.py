@@ -4,8 +4,7 @@ tdiameter, theight = 600.0 * CM, 200.0 * CM
 four_cm = 4.0 * CM
 wall = four_cm
 
-exterior = Pos(0.0, 0.0) * Circle(radius=tdiameter / 2.0)
-exttank = extrude(exterior, theight)
+exttank = Pos(0.0, 0.0, theight * 0.5) * Cylinder(radius=tdiameter / 2.0, height=theight)
 
 topf = exttank.faces().sort_by().last
 tank = offset(exttank, amount=-wall, openings=topf)
